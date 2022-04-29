@@ -1,0 +1,19 @@
+{
+	"name": "testboardgame",
+	"version": "1.0.0",
+	"description": "Testing boardgame.io",
+	"main": "index.js",
+	"scripts": {
+		"start": "parcel index.html --open"
+	},
+	"browserslist": "defaults and supports async-functions",
+	"keywords": [],
+	"author": "Nauviax",
+	"license": "ISC",
+	"dependencies": {
+		"boardgame.io": "^0.49.11"
+	},
+	"devDependencies": {
+		"parcel-bundler": "^1.12.5"
+	}
+}
