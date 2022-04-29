@@ -117,46 +117,41 @@ function GenerateMap(map, mapSize) { // Checks if every cell has selected a tile
 
 			let tile = nullTiles[Math.floor(Math.random() * nullTiles.length)]; // Pick a random tile that has no tile selected
 
-			// Temp code for weighting
-			/*
-			outside = 300;
-			inside = 150;
-			wallStraight0a = 70;
-			wallStraight1a = 70;
-			wallStraight0b = 70;
-			wallStraight1b = 70;
-			wallCorner0a = 30;
-			wallCorner1a = 30;
-			wallCorner2a = 30;
-			wallCorner3a = 30;
-			wallCorner0b = 10;
-			wallCorner1b = 10;
-			wallCorner2b = 10;
-			wallCorner3b = 10;
-			wallDoor0a = 5;
-			wallDoor1a = 5;
-			wallDoor0b = 5;
-			wallDoor1b = 5;
-			
-
-			*/
-
-			// If tileList contains inside or outside, prefer picking those
-			if (tile.tileList.includes(outside)) {
-				let chance = 0.7; // Chance to just pick outside
-				if (Math.random() < chance) {
-					tile.tile = outside;
-				}
-				else { // Otherwise, pick normally
-					let tileIndex = Math.floor(Math.random() * tile.tileList.length); // Pick a random tile from the list
-					tile.tile = tile.tileList[tileIndex]; // Select the tile
+			// Select based on weights
+			// Sum all weights in the tile's list
+			let totalWeight = 0;
+			for (let ii = 0; ii < tile.tileList.length; ii++) {
+				totalWeight += tile.tileList[ii].weight;
+			}
+			// Pick a random number between 0 and the total weight
+			let randomWeight = Math.floor(Math.random() * totalWeight);
+			// Loop through the tile's list until the random number is less than the running total weight
+			let runningTotalWeight = 0;
+			for (let ii = 0; ii < tile.tileList.length; ii++) {
+				runningTotalWeight += tile.tileList[ii].weight;
+				if (runningTotalWeight >= randomWeight) {
+					tile.tile = tile.tileList[ii];
+					tile.tileList = [];
+					break;
 				}
 			}
-			else { // Otherwise, pick normally
-				let tileIndex = Math.floor(Math.random() * tile.tileList.length); // Pick a random tile from the list
-				tile.tile = tile.tileList[tileIndex]; // Select the tile
-			}
-			tile.tileList = []; // Remove all tiles from the tilelist (so it can't be selected again)
+
+			// // If tileList contains inside or outside, prefer picking those (This is old code, here for reference/rollback if needed)
+			// if (tile.tileList.includes(outside)) {
+			// 	let chance = 0.7; // Chance to just pick outside
+			// 	if (Math.random() < chance) {
+			// 		tile.tile = outside;
+			// 	}
+			// 	else { // Otherwise, pick normally
+			// 		let tileIndex = Math.floor(Math.random() * tile.tileList.length); // Pick a random tile from the list
+			// 		tile.tile = tile.tileList[tileIndex]; // Select the tile
+			// 	}
+			// // }
+			// else { // Otherwise, pick normally
+			// 	let tileIndex = Math.floor(Math.random() * tile.tileList.length); // Pick a random tile from the list
+			// 	tile.tile = tile.tileList[tileIndex]; // Select the tile
+			// }
+			// tile.tileList = []; // Remove all tiles from the tilelist (so it can't be selected again)
 
 			// Debug
 			console.log("SET tile at " + tile.x + "," + tile.y + ": " + tile.tile.id);
@@ -383,80 +378,98 @@ function CellData(x, y) { // Stores the possible tiles for a cell, the location 
 const outside = { // Generic tile
 	id: ' ',
 	sides: Array(4).fill("0"),
+	weight: 300,
 };
 const inside = { // Generic tile, will be assigned a building id after generation
 	id: '█',
 	sides: Array(4).fill("1"),
+	weight: 150,
 };
 
 
 const wallStraight0a = { // Top to bottom, others are rotated clockwise. 'a' means inside is above or to the right, 'b' means inside is below or to the left
 	id: '│',
 	sides: Array(4).fill("2a", 0, 1).fill("1", 1, 2).fill("2a", 2, 3).fill("0", 3, 4),
+	weight: 30,
 };
 const wallStraight1a = {
 	id: '─',
 	sides: Array(4).fill("1", 0, 1).fill("2a", 1, 2).fill("0", 2, 3).fill("2a", 3, 4),
+	weight: 30,
 };
 const wallStraight0b = {
 	id: '│',
 	sides: Array(4).fill("2b", 0, 1).fill("0", 1, 2).fill("2b", 2, 3).fill("1", 3, 4),
+	weight: 30,
 };
 const wallStraight1b = {
 	id: '─',
 	sides: Array(4).fill("0", 0, 1).fill("2b", 1, 2).fill("1", 2, 3).fill("2b", 3, 4),
+	weight: 30,
 };
 
 
 const wallCorner0a = { // Top to right, all others are rotated clockwise. 'a' means corner is inside, 'b' means  corner is outside
 	id: '└',
 	sides: Array(4).fill("2a", 0, 1).fill("2a", 1, 2).fill("0", 2, 3).fill("0", 3, 4),
+	weight: 60,
 };
 const wallCorner1a = {
 	id: '┌',
 	sides: Array(4).fill("0", 0, 1).fill("2a", 1, 2).fill("2a", 2, 3).fill("0", 3, 4),
+	weight: 60,
 };
 const wallCorner2a = {
 	id: '┐',
 	sides: Array(4).fill("0", 0, 1).fill("0", 1, 2).fill("2a", 2, 3).fill("2a", 3, 4),
+	weight: 60,
 };
 const wallCorner3a = {
 	id: '┘',
 	sides: Array(4).fill("2a", 0, 1).fill("0", 1, 2).fill("0", 2, 3).fill("2a", 3, 4),
+	weight: 60,
 };
 const wallCorner0b = {
 	id: '└',
 	sides: Array(4).fill("2b", 0, 1).fill("2b", 1, 2).fill("1", 2, 3).fill("1", 3, 4),
+	weight: 10,
 };
 const wallCorner1b = {
 	id: '┌',
 	sides: Array(4).fill("1", 0, 1).fill("2b", 1, 2).fill("2b", 2, 3).fill("1", 3, 4),
+	weight: 10,
 };
 const wallCorner2b = {
 	id: '┐',
 	sides: Array(4).fill("1", 0, 1).fill("1", 1, 2).fill("2b", 2, 3).fill("2b", 3, 4),
+	weight: 10,
 };
 const wallCorner3b = {
 	id: '┘',
 	sides: Array(4).fill("2b", 0, 1).fill("1", 1, 2).fill("1", 2, 3).fill("2b", 3, 4),
+	weight: 10,
 };
 
 
 const wallDoor0a = { // Follows same rules as wallStraight but, yknow, it's also a door
 	id: '╠',
 	sides: Array(4).fill("2a", 0, 1).fill("1", 1, 2).fill("2a", 2, 3).fill("0", 3, 4),
+	weight: 5,
 };
 const wallDoor1a = {
 	id: '╩',
 	sides: Array(4).fill("1", 0, 1).fill("2a", 1, 2).fill("0", 2, 3).fill("2a", 3, 4),
+	weight: 5,
 };
 const wallDoor0b = {
 	id: '╣',
 	sides: Array(4).fill("2b", 0, 1).fill("0", 1, 2).fill("2b", 2, 3).fill("1", 3, 4),
+	weight: 5,
 };
 const wallDoor1b = {
 	id: '╦',
 	sides: Array(4).fill("0", 0, 1).fill("2b", 1, 2).fill("1", 2, 3).fill("2b", 3, 4),
+	weight: 5,
 };
 
 // Some constant lists for checking if a tile is in a certian category
