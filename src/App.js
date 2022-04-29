@@ -44,6 +44,9 @@ class TestGameClient {
 	}
 
 	update(state) {
+		if (state.G.cells == null) {
+			return; // Chill for a bit longer, no map yet.
+		}
 		// Get all the board cells.
 		const cells = this.rootElement.querySelectorAll('.cell');
 		// Update cells to display the values in game state.

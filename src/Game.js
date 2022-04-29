@@ -1,6 +1,9 @@
+var GAMEMAP = null; // Hopefully a global variable
+var MAPSIZE = 5; // The size of the map (NxN)
+
 export const TestGame = {
 	setup: () => ({
-		cells: PrepareCells(),
+		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
 		playerLocations: Array(2).fill(0, 0, 1).fill(24, 1, 2),
 	}),
 	turn: {
@@ -9,52 +12,68 @@ export const TestGame = {
 	},
 	moves: {
 		clickCell: (G, ctx, id) => {
-			if (G.cells[Math.floor(id / 5)][id % 5] !== null) { return INVALID_MOVE; } // Must be empty
-			const player = ctx.currentPlayer;
-			const playerLocation = G.playerLocations[player];
-			const deltaX = id % 5 - playerLocation % 5;
-			const deltaY = Math.floor(id / 5) - Math.floor(playerLocation / 5);
-			if (deltaX != 0 && deltaY != 0) { return INVALID_MOVE; } // Must be in a straight line
-			G.cells[Math.floor(playerLocation / 5)][playerLocation % 5] = null;
-			G.cells[Math.floor(id / 5)][id % 5] = player;
-			G.playerLocations[player] = id;
 
-			const size = 15;
-			var newMap = InitializeMap(size); // Oh God here we go (!!!)
-			for (let ii = 0; ii < size; ii++) {
-				var row = '';
-				for (let jj = 0; jj < size; jj++) {
-					row += newMap[jj][ii].tile.id;
+			// OLD CODE (Will not work with new map generation)
+			// if (G.cells[Math.floor(id / 5)][id % 5].tile.id !== ' ') { return INVALID_MOVE; } // Must be empty
+			// const player = ctx.currentPlayer;
+			// const playerLocation = G.playerLocations[player];
+			// const deltaX = id % 5 - playerLocation % 5;
+			// const deltaY = Math.floor(id / 5) - Math.floor(playerLocation / 5);
+			// if (deltaX != 0 && deltaY != 0) { return INVALID_MOVE; } // Must be in a straight line
+			// G.cells[Math.floor(playerLocation / 5)][playerLocation % 5] = null;
+			// G.cells[Math.floor(id / 5)][id % 5] = player;
+			// G.playerLocations[player] = id;
+
+
+			GAMEMAP = InitializeMap(MAPSIZE);
+			let Gmap = [];
+			for (let ii = 0; ii < MAPSIZE; ii++) {
+				Gmap[ii] = [];
+				for (let jj = 0; jj < MAPSIZE; jj++) {
+					Gmap[ii][jj] = GAMEMAP[ii][jj].tile.id;
 				}
-				console.log(row);
-				//console.log(" ");
 			}
+			G.cells = Gmap; // Damn fussy json serialiatible objects or whatever
+
+			// good old code, keep longer
+			// const size = 15;
+			// var newMap = InitializeMap(size); // Oh God here we go (!!!)
+			// for (let ii = 0; ii < size; ii++) {
+			// 	var row = '';
+			// 	for (let jj = 0; jj < size; jj++) {
+			// 		row += newMap[jj][ii].tile.id;
+			// 	}
+			// 	console.log(row);
+			// 	//console.log(" ");
+			// }
 
 		},
 	},
 	endIf: (G, ctx) => {
-		let winner = IsVictory(G.playerLocations, ctx.currentPlayer);
-		if (winner !== null) {
-			return { winner };
-		}
+		// OLD CODE
+		// let winner = IsVictory(G.playerLocations, ctx.currentPlayer);
+		// if (winner !== null) {
+		// 	return { winner };
+		// }
 	},
-	ai: { // Very simple for now
-		enumerate: (G, ctx) => {
-			let moves = [];
-			const playerLocation = G.playerLocations[ctx.playOrderPos];
+	// EVEN MORE OLD CODE
+	// ai: { // Very simple for now
+	// 	enumerate: (G, ctx) => {
+	// 		let moves = [];
+	// 		const playerLocation = G.playerLocations[ctx.playOrderPos];
 
-			for (let ii = 0; ii < 25; ii++) {
-				if (G.cells[Math.floor(ii / 5)][ii % 5] === null) {
-					const deltaX = ii % 5 - playerLocation % 5;
-					const deltaY = Math.floor(ii / 5) - Math.floor(playerLocation / 5);
-					if (deltaX == 0 || deltaY == 0) {
-						moves.push({ move: 'clickCell', args: [ii] });
-					}
-				}
-			}
-			return moves;
-		},
-	},
+	// 		for (let ii = 0; ii < 25; ii++) {
+	// 			if (G.cells[Math.floor(ii / 5)][ii % 5] === null) {
+	// 				const deltaX = ii % 5 - playerLocation % 5;
+	// 				const deltaY = Math.floor(ii / 5) - Math.floor(playerLocation / 5);
+	// 				if (deltaX == 0 || deltaY == 0) {
+	// 					moves.push({ move: 'clickCell', args: [ii] });
+	// 				}
+	// 			}
+	// 		}
+	// 		return moves;
+	// 	},
+	// },
 };
 
 function IsVictory(playerLocations, currentPlayer) {
@@ -68,8 +87,14 @@ function IsVictory(playerLocations, currentPlayer) {
 	}
 };
 
-function PrepareCells() { // Will be used to return a generated array of cells that can be read inside of 'G'
-	return Array(5).fill(Array(5).fill(null).fill("0", 0, 1), 0, 1).fill(Array(5).fill(null), 1, 2).fill(Array(5).fill(null), 2, 3).fill(Array(5).fill(null), 3, 4).fill(Array(5).fill(null).fill("1", 4, 5), 4, 5)
+function GenerateGenericBoard() { // Initial board with no random generation (looks like '\') (This is temporary)
+	return [
+		[new CellData(0, 4, inside), new CellData(1, 4, outside), new CellData(2, 4, outside), new CellData(3, 4, outside), new CellData(4, 4, outside)],
+		[new CellData(0, 3, outside), new CellData(1, 3, inside), new CellData(2, 3, outside), new CellData(3, 3, outside), new CellData(4, 3, outside)],
+		[new CellData(0, 2, outside), new CellData(1, 2, outside), new CellData(2, 2, inside), new CellData(3, 2, outside), new CellData(4, 2, outside)],
+		[new CellData(0, 1, outside), new CellData(1, 1, outside), new CellData(2, 1, outside), new CellData(3, 1, inside), new CellData(4, 1, outside)],
+		[new CellData(0, 0, outside), new CellData(1, 0, outside), new CellData(2, 0, outside), new CellData(3, 0, outside), new CellData(4, 0, inside)],
+	]
 }
 
 // Generation code below
@@ -368,8 +393,8 @@ function UpdateTile(tile, map, mapSize, depth) {
 
 // Map tiles below
 
-function CellData(x, y) { // Stores the possible tiles for a cell, the location of this cell, and a reference to the cells around itself (To be filled in later, not in constructor)
-	this.tile = null;
+function CellData(x, y, tile = null) { // Stores the possible tiles for a cell, the location of this cell, and a reference to the cells around itself (To be filled in later, not in constructor)
+	this.tile = tile;
 	this.tileList = [outside, inside, wallStraight0a, wallStraight1a, wallStraight0b, wallStraight1b, wallCorner0a, wallCorner1a, wallCorner2a, wallCorner3a, wallCorner0b, wallCorner1b, wallCorner2b, wallCorner3b, wallDoor0a, wallDoor1a, wallDoor0b, wallDoor1b];
 	this.x = x;
 	this.y = y;
