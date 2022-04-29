@@ -1,6 +1,6 @@
 export const TestGame = {
 	setup: () => ({
-		cells: Array(5).fill(Array(5).fill(null).fill("0", 0, 1), 0, 1).fill(Array(5).fill(null), 1, 2).fill(Array(5).fill(null), 2, 3).fill(Array(5).fill(null), 3, 4).fill(Array(5).fill(null).fill("1", 4, 5), 4, 5),
+		cells: PrepareCells(),
 		playerLocations: Array(2).fill(0, 0, 1).fill(24, 1, 2),
 	}),
 	turn: {
@@ -68,6 +68,9 @@ function IsVictory(playerLocations, currentPlayer) {
 	}
 };
 
+function PrepareCells() { // Will be used to return a generated array of cells that can be read inside of 'G'
+	return Array(5).fill(Array(5).fill(null).fill("0", 0, 1), 0, 1).fill(Array(5).fill(null), 1, 2).fill(Array(5).fill(null), 2, 3).fill(Array(5).fill(null), 3, 4).fill(Array(5).fill(null).fill("1", 4, 5), 4, 5)
+}
 
 // Generation code below
 
