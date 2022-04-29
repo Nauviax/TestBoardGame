@@ -1,5 +1,6 @@
 node_modules
-.cahce/
+.cache/
+.cache
 dist/
 .cache/b0/13176344a2656839974c97a3c7ce47.json
 dist/App.f684dadd.js
