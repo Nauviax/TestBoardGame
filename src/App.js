@@ -15,9 +15,9 @@ class TestGameClient {
 	}
 
 	createBoard(state) {
-		// Create a 5x5 board of cells
+		// Create a nxn board of cells
 		const rows = [];
-		const mapSize = state.G._mapSize;
+		const mapSize = state.G._mapSize * 3; // Each tile is 3x3
 		for (let i = 0; i < mapSize; i++) {
 			const cells = [];
 			for (let j = 0; j < mapSize; j++) {
@@ -51,23 +51,24 @@ class TestGameClient {
 			return; // Don't update the board yet, will crash
 		}
 		// Get board size
-		const mapSize = state.G._mapSize;
+		const mapSize = state.G._mapSize * 3; // Each tile is 3x3
 		// Get all the board cells.
 		const cells = this.rootElement.querySelectorAll('.cell');
 		// Update cells to display the values in game state.
-		const playerLocation = state.G.playerLocations[state.ctx.playOrderPos];
 		cells.forEach(cell => {
-			const cellId = parseInt(cell.dataset.id);
-			const cellValue = state.G.cells[Math.floor(cellId / mapSize)][cellId % mapSize]; // 2D array yay
+			const cellID = parseInt(cell.dataset.id);
+			const cellValue = state.G.cells[Math.floor(cellID / mapSize)][cellID % mapSize]; // 2D array yay !!! Is this wrong way around?
 			if (cellValue === null) {
-				const deltaX = cellId % mapSize - playerLocation % mapSize;
-				const deltaY = Math.floor(cellId / mapSize) - Math.floor(playerLocation / mapSize);
-				if (!state.ctx.gameover && ((deltaX == 0) != (deltaY == 0))) { // Implements xor
-					cell.textContent = "•";
-				}
-				else {
-					cell.textContent = "";
-				}
+				// OLD PLAYER MOVE INDICATOR CODE (Salvage for pathfinding maybe?)
+				// const deltaX = cellId % mapSize - playerLocation % mapSize;
+				// const deltaY = Math.floor(cellId / mapSize) - Math.floor(playerLocation / mapSize);
+				// if (!state.ctx.gameover && ((deltaX == 0) != (deltaY == 0))) { // Implements xor
+				// 	cell.textContent = "•";
+				// }
+				// else {
+				// 	cell.textContent = "";
+				// }
+				cell.textContent = "error";
 			}
 			else {
 				cell.textContent = cellValue;
