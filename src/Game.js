@@ -1,3 +1,5 @@
+// Map generation code is located at the bottom of this file due to it's size
+
 var GAMEMAP = null; // Hopefully a global variable
 var MAPSIZE = 6; // The size of the map (NxN)
 var ROOMNUM = 6; // Number of rooms to generate. Note this is FULL rooms, not room tiles
@@ -60,6 +62,8 @@ export const TestGame = {
 				console.log(row);
 			}
 
+			PlacePlayers(G, ctx.numPlayers); // Place all players on the map and save their positions as [x,y]
+
 		},
 	},
 	endIf: (G, ctx) => {
@@ -81,6 +85,32 @@ export const TestGame = {
 // 		return null;
 // 	}
 // };
+
+function PlacePlayers(G, numPlayers) { // Get all players and place them randomly on the map, ensuring only placing on empty spaces, and saving their positions as [x,y] in G.playerLocations
+	let playerLocations = [];
+	let mapSize = G._mapSize * 3; // Each tile is 3x3
+	for (let ii = 0; ii < numPlayers; ii++) {
+		let playerX = Math.floor(Math.random() * mapSize);
+		let playerY = Math.floor(Math.random() * mapSize);
+		while (G.cells[playerY][playerX] !== ' ') { // Ensure spot is clear
+			playerX = Math.floor(Math.random() * mapSize);
+			playerY = Math.floor(Math.random() * mapSize);
+		}
+		G.cells[playerY][playerX] = ii;
+		playerLocations[ii] = [playerX, playerY];
+	}
+	G.playerLocations = playerLocations;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 // Generation code below
