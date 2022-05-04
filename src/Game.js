@@ -1,10 +1,11 @@
 var GAMEMAP = null; // Hopefully a global variable
-var MAPSIZE = 5; // The size of the map (NxN)
+var MAPSIZE = 10; // The size of the map (NxN)
 
 export const TestGame = {
 	setup: () => ({
+		_mapSize: MAPSIZE,
 		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
-		playerLocations: Array(2).fill(0, 0, 1).fill(24, 1, 2),
+		playerLocations: Array(2).fill(0, 0, 1).fill(24, 1, 2), // !!! Add method for adding players to random outside locations
 	}),
 	turn: {
 		minMoves: 1,
@@ -30,22 +31,19 @@ export const TestGame = {
 			for (let ii = 0; ii < MAPSIZE; ii++) {
 				Gmap[ii] = [];
 				for (let jj = 0; jj < MAPSIZE; jj++) {
-					Gmap[ii][jj] = GAMEMAP[ii][jj].tile.id;
+					Gmap[ii][jj] = GAMEMAP[jj][ii].tile.id;
 				}
 			}
 			G.cells = Gmap; // Damn fussy json serialiatible objects or whatever
 
 			// good old code, keep longer
-			// const size = 15;
-			// var newMap = InitializeMap(size); // Oh God here we go (!!!)
-			// for (let ii = 0; ii < size; ii++) {
-			// 	var row = '';
-			// 	for (let jj = 0; jj < size; jj++) {
-			// 		row += newMap[jj][ii].tile.id;
-			// 	}
-			// 	console.log(row);
-			// 	//console.log(" ");
-			// }
+			for (let ii = 0; ii < MAPSIZE; ii++) {
+				var row = '';
+				for (let jj = 0; jj < MAPSIZE; jj++) {
+					row += GAMEMAP[jj][ii].tile.id;
+				}
+				console.log(row);
+			}
 
 		},
 	},

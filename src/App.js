@@ -2,25 +2,26 @@ import { Client } from 'boardgame.io/client';
 import { TestGame } from './Game';
 import { INVALID_MOVE } from 'boardgame.io/core';
 
-// To launch this app, type npm start into a console
+var InitialMapGenerated = false;
 
+// To launch this app, type 'npm start' into a console
 class TestGameClient {
 	constructor(rootElement) {
 		this.client = Client({ game: TestGame });
 		this.client.start();
 		this.rootElement = rootElement;
-		this.createBoard();
-		this.attachListeners();
 		this.client.subscribe(state => this.update(state));
+		this.attachListeners();
 	}
 
-	createBoard() {
+	createBoard(state) {
 		// Create a 5x5 board of cells
 		const rows = [];
-		for (let i = 0; i < 5; i++) {
+		const mapSize = state.G._mapSize;
+		for (let i = 0; i < mapSize; i++) {
 			const cells = [];
-			for (let j = 0; j < 5; j++) {
-				const id = 5 * i + j;
+			for (let j = 0; j < mapSize; j++) {
+				const id = mapSize * i + j;
 				cells.push(`<td class="cell" data-id="${id}"></td>`);
 			}
 			rows.push(`<tr>${cells.join('')}</tr>`);
@@ -44,19 +45,23 @@ class TestGameClient {
 	}
 
 	update(state) {
-		if (state.G.cells == null) {
-			return; // Chill for a bit longer, no map yet.
+		if (!InitialMapGenerated) { // Create cells on the screen on first update
+			this.createBoard(state);
+			InitialMapGenerated = true;
+			return; // Don't update the board yet, will crash
 		}
+		// Get board size
+		const mapSize = state.G._mapSize;
 		// Get all the board cells.
 		const cells = this.rootElement.querySelectorAll('.cell');
 		// Update cells to display the values in game state.
 		const playerLocation = state.G.playerLocations[state.ctx.playOrderPos];
 		cells.forEach(cell => {
 			const cellId = parseInt(cell.dataset.id);
-			const cellValue = state.G.cells[Math.floor(cellId / 5)][cellId % 5]; // 2D array yay
+			const cellValue = state.G.cells[Math.floor(cellId / mapSize)][cellId % mapSize]; // 2D array yay
 			if (cellValue === null) {
-				const deltaX = cellId % 5 - playerLocation % 5;
-				const deltaY = Math.floor(cellId / 5) - Math.floor(playerLocation / 5);
+				const deltaX = cellId % mapSize - playerLocation % mapSize;
+				const deltaY = Math.floor(cellId / mapSize) - Math.floor(playerLocation / mapSize);
 				if (!state.ctx.gameover && ((deltaX == 0) != (deltaY == 0))) { // Implements xor
 					cell.textContent = "•";
 				}
