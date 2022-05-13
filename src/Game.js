@@ -1,69 +1,64 @@
 // Map generation code is located at the bottom of this file due to it's size
 
+import { INVALID_MOVE } from 'boardgame.io/core'; // Handles invalid moves
+
 var GAMEMAP = null; // Hopefully a global variable
 var MAPSIZE = 6; // The size of the map (NxN)
 var ROOMNUM = 6; // Number of rooms to generate. Note this is FULL rooms, not room tiles
 
+var MOVESIZETEMP = 4; // Temporary variable for player movement
+
 export const TestGame = {
 	setup: () => ({
+		_mapGenerated: false, // True once a map is generated
 		_mapSize: MAPSIZE,
+		_boardSize: MAPSIZE * 3, // 3x3 cells and all
 		_roomNum: ROOMNUM,
 		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
 		playerLocations: [], // Stores the location of players, so they can be found easily
+		diceRoll: null, // Stores the dice roll for the current turn
 	}),
 	turn: {
 		minMoves: 1,
 		maxMoves: 1,
 	},
 	moves: {
+		rollDice: (G, ctx) => {
+			// Rolls the dice and saves the result to G
+			G.diceRoll = Math.floor(Math.random() * 11) + 2; // Rolls two "dice," random number between 2 and 12
+		},
 		clickCell: (G, ctx, id) => {
-
-			// OLD CODE (Will not work with new map generation)
-			// if (G.cells[Math.floor(id / 5)][id % 5].tile.id !== ' ') { return INVALID_MOVE; } // Must be empty
-			// const player = ctx.currentPlayer;
-			// const playerLocation = G.playerLocations[player];
-			// const deltaX = id % 5 - playerLocation % 5;
-			// const deltaY = Math.floor(id / 5) - Math.floor(playerLocation / 5);
-			// if (deltaX != 0 && deltaY != 0) { return INVALID_MOVE; } // Must be in a straight line
-			// G.cells[Math.floor(playerLocation / 5)][playerLocation % 5] = null;
-			// G.cells[Math.floor(id / 5)][id % 5] = player;
-			// G.playerLocations[player] = id;
-
-			// Clicking once will generate a new map. When player movement is added, this will need to change.
-
-			GAMEMAP = InitializeMap(MAPSIZE, ROOMNUM); // Generate a new map
-			let Gmap = [];
-			for (let ii = 0; ii < MAPSIZE * 3; ii += 3) { // Each tile is 3x3, so we need to split the map into 3x3 tiles
-				Gmap[ii] = [];
-				Gmap[ii + 1] = [];
-				Gmap[ii + 2] = [];
-				for (let jj = 0; jj < MAPSIZE * 3; jj += 3) {
-					let iidiv3 = ii / 3;
-					let jjdiv3 = jj / 3;
-					Gmap[ii][jj] = GAMEMAP[jjdiv3][iidiv3].tile.walls[0][0];
-					Gmap[ii][jj + 1] = GAMEMAP[jjdiv3][iidiv3].tile.walls[0][1];
-					Gmap[ii][jj + 2] = GAMEMAP[jjdiv3][iidiv3].tile.walls[0][2];
-					Gmap[ii + 1][jj] = GAMEMAP[jjdiv3][iidiv3].tile.walls[1][0];
-					Gmap[ii + 1][jj + 1] = GAMEMAP[jjdiv3][iidiv3].tile.walls[1][1];
-					Gmap[ii + 1][jj + 2] = GAMEMAP[jjdiv3][iidiv3].tile.walls[1][2];
-					Gmap[ii + 2][jj] = GAMEMAP[jjdiv3][iidiv3].tile.walls[2][0];
-					Gmap[ii + 2][jj + 1] = GAMEMAP[jjdiv3][iidiv3].tile.walls[2][1];
-					Gmap[ii + 2][jj + 2] = GAMEMAP[jjdiv3][iidiv3].tile.walls[2][2];
-				}
-			}
-			G.cells = Gmap; // Damn fussy json serialiatible objects or whatever
-
-			// Print id map to console
-			for (let ii = 0; ii < MAPSIZE; ii++) {
-				var row = '';
-				for (let jj = 0; jj < MAPSIZE; jj++) {
-					row += GAMEMAP[jj][ii].tile.id;
-				}
-				console.log(row);
+			if (!G._mapGenerated) {
+				return INVALID_MOVE; // Don't do anything if the map hasn't been generated yet
 			}
 
-			PlacePlayers(G, ctx.numPlayers); // Place all players on the map and save their positions as [x,y]
+			let idx = id % G._boardSize;
+			let idy = Math.floor(id / G._boardSize);
 
+			if (G.cells[idx][idy] !== ' ') { return INVALID_MOVE; } // Must be empty !!! Placing on walls?
+
+			const player = ctx.currentPlayer;
+			const playerLocation = G.playerLocations[player];
+			const deltaX = idx - playerLocation[0];
+			const deltaY = idy - playerLocation[1];
+
+			console.log(Math.abs(deltaX) + Math.abs(deltaY));
+
+			if (Math.abs(deltaX) + Math.abs(deltaY) > MOVESIZETEMP) { return INVALID_MOVE; } // Must be close enough
+
+			G.cells[playerLocation[0]][playerLocation[1]] = ' '; // Remove player from old location
+			G.cells[idx][idy] = player; // Place player in new location
+			G.playerLocations[player] = [idx, idy]; // Save new player location
+
+		},
+	},
+	phases: {
+		Main: {
+			// Called at the beginning of a phase.
+			onBegin: (G, ctx) => { GenerateEverything(G, ctx) },
+
+			// Make this phase the first phase of the game.
+			start: true,
 		},
 	},
 	endIf: (G, ctx) => {
@@ -86,20 +81,59 @@ export const TestGame = {
 // 	}
 // };
 
-function PlacePlayers(G, numPlayers) { // Get all players and place them randomly on the map, ensuring only placing on empty spaces, and saving their positions as [x,y] in G.playerLocations
-	let playerLocations = [];
-	let mapSize = G._mapSize * 3; // Each tile is 3x3
-	for (let ii = 0; ii < numPlayers; ii++) {
-		let playerX = Math.floor(Math.random() * mapSize);
-		let playerY = Math.floor(Math.random() * mapSize);
-		while (G.cells[playerY][playerX] !== ' ') { // Ensure spot is clear
-			playerX = Math.floor(Math.random() * mapSize);
-			playerY = Math.floor(Math.random() * mapSize);
+function GenerateEverything(G, ctx) {
+	// Generates a new map, player locations and saves them to G
+
+	let mapSize = G._mapSize;
+	let boardSize = G._boardSize; // Mapsize * 3 by default
+	let roomNum = G._roomNum;
+
+	GAMEMAP = InitializeMap(mapSize, roomNum); // Generate a new map
+	let Gmap = [];
+	for (let ii = 0; ii < boardSize; ii += 3) { // Each tile is 3x3, so we need to split the map into 3x3 tiles
+		Gmap[ii] = [];
+		Gmap[ii + 1] = [];
+		Gmap[ii + 2] = [];
+		for (let jj = 0; jj < boardSize; jj += 3) {
+			let iidiv3 = ii / 3;
+			let jjdiv3 = jj / 3;
+			Gmap[ii][jj] = GAMEMAP[iidiv3][jjdiv3].tile.walls[0][0];
+			Gmap[ii][jj + 1] = GAMEMAP[iidiv3][jjdiv3].tile.walls[0][1];
+			Gmap[ii][jj + 2] = GAMEMAP[iidiv3][jjdiv3].tile.walls[0][2];
+			Gmap[ii + 1][jj] = GAMEMAP[iidiv3][jjdiv3].tile.walls[1][0];
+			Gmap[ii + 1][jj + 1] = GAMEMAP[iidiv3][jjdiv3].tile.walls[1][1];
+			Gmap[ii + 1][jj + 2] = GAMEMAP[iidiv3][jjdiv3].tile.walls[1][2];
+			Gmap[ii + 2][jj] = GAMEMAP[iidiv3][jjdiv3].tile.walls[2][0];
+			Gmap[ii + 2][jj + 1] = GAMEMAP[iidiv3][jjdiv3].tile.walls[2][1];
+			Gmap[ii + 2][jj + 2] = GAMEMAP[iidiv3][jjdiv3].tile.walls[2][2];
 		}
-		G.cells[playerY][playerX] = ii;
+	}
+
+	// Print id map to console
+	for (let ii = 0; ii < mapSize; ii++) {
+		var row = '';
+		for (let jj = 0; jj < mapSize; jj++) {
+			row += GAMEMAP[jj][ii].tile.id;
+		}
+		console.log(row);
+	}
+
+	// Place all players in empty spots on the map and save their positions as [x,y]
+	let playerLocations = [];
+	for (let ii = 0; ii < ctx.numPlayers; ii++) {
+		let playerX = Math.floor(Math.random() * boardSize);
+		let playerY = Math.floor(Math.random() * boardSize);
+		while (Gmap[playerX][playerY] !== ' ') { // Ensure spot is clear
+			playerX = Math.floor(Math.random() * boardSize);
+			playerY = Math.floor(Math.random() * boardSize);
+		}
+		Gmap[playerX][playerY] = ii;
 		playerLocations[ii] = [playerX, playerY];
 	}
+
 	G.playerLocations = playerLocations;
+	G.cells = Gmap;
+	G._mapGenerated = true; // Let's see if this works
 }
 
 
@@ -374,51 +408,51 @@ const roomLargeA1 = { // A large 2x2 room. Starting top left, then reading order
 	id: 'a',
 	sides: ["0", "at", "al", "0"], // "at" as in a, top join. "al" as in a, left join etc.
 	weight: 60,
-	walls: [['█', '█', '█'], ['o', ' ', ' '], ['█', ' ', '█']]
+	walls: [['█', 'o', '█'], ['█', ' ', ' '], ['█', ' ', '█']]
 };
 const roomLargeA2 = {
 	id: 'a',
 	sides: ["0", "0", "ar", "at"],
 	weight: 60,
-	walls: [['█', 'o', '█'], [' ', ' ', '█'], ['█', ' ', '█']]
+	walls: [['█', ' ', '█'], ['o', ' ', ' '], ['█', '█', '█']]
 };
 const roomLargeA3 = {
 	id: 'a',
 	sides: ["al", "ab", "0", "0"],
 	weight: 60,
-	walls: [['█', ' ', '█'], ['█', ' ', ' '], ['█', 'o', '█']]
+	walls: [['█', '█', '█'], [' ', ' ', 'o'], ['█', ' ', '█']]
 };
 const roomLargeA4 = {
 	id: 'a',
 	sides: ["ar", "0", "0", "ab"],
 	weight: 60,
-	walls: [['█', ' ', '█'], [' ', ' ', 'o'], ['█', '█', '█']]
+	walls: [['█', ' ', '█'], [' ', ' ', '█'], ['█', 'o', '█']]
 };
 
 const roomMediumB1 = { // A medium 1x2 room. Same order
 	id: 'b',
 	sides: ["0", "0", "b", "0"],
 	weight: 80,
-	walls: [['█', '█', '█'], ['█', ' ', 'o'], ['█', ' ', '█']]
+	walls: [['█', '█', '█'], ['█', ' ', ' '], ['█', 'o', '█']]
 };
 const roomMediumB2 = {
 	id: 'b',
 	sides: ["b", "0", "0", "0"],
 	weight: 80,
-	walls: [['█', ' ', '█'], ['o', ' ', '█'], ['█', '█', '█']]
+	walls: [['█', 'o', '█'], [' ', ' ', '█'], ['█', '█', '█']]
 };
 
 const roomMediumC1 = { // A medium 2x1 room.
 	id: 'c',
 	sides: ["0", "c", "0", "0"],
 	weight: 80,
-	walls: [['█', '█', '█'], ['o', ' ', ' '], ['█', '█', '█']]
+	walls: [['█', 'o', '█'], ['█', ' ', '█'], ['█', ' ', '█']]
 };
 const roomMediumC2 = {
 	id: 'c',
 	sides: ["0", "0", "0", "c"],
 	weight: 80,
-	walls: [['█', 'o', '█'], [' ', ' ', '█'], ['█', 'o', '█']]
+	walls: [['█', ' ', '█'], ['o', ' ', 'o'], ['█', '█', '█']]
 };
 
 const roomSmallD1 = { // A small 1x1 room. Small rooms differ only by door placement
@@ -439,7 +473,7 @@ const roomSmallF1 = { // A small 1x1 room.
 	id: 'f',
 	sides: ["0", "0", "0", "0"],
 	weight: 100,
-	walls: [['█', '█', '█'], ['o', ' ', 'o'], ['█', '█', '█']]
+	walls: [['█', 'o', '█'], ['█', ' ', '█'], ['█', 'o', '█']]
 };
 
 // Some constant lists for checking if a tile is in a certian category

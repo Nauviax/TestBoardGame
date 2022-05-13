@@ -1,6 +1,5 @@
 import { Client } from 'boardgame.io/client';
 import { TestGame } from './Game';
-import { INVALID_MOVE } from 'boardgame.io/core';
 
 var InitialMapGenerated = false;
 
@@ -48,32 +47,35 @@ class TestGameClient {
 		if (!InitialMapGenerated) { // Create cells on the screen on first update
 			this.createBoard(state);
 			InitialMapGenerated = true;
-			return; // Don't update the board yet, will crash
 		}
-		// Get board size
-		const mapSize = state.G._mapSize * 3; // Each tile is 3x3
-		// Get all the board cells.
-		const cells = this.rootElement.querySelectorAll('.cell');
-		// Update cells to display the values in game state.
-		cells.forEach(cell => {
-			const cellID = parseInt(cell.dataset.id);
-			const cellValue = state.G.cells[Math.floor(cellID / mapSize)][cellID % mapSize]; // 2D array yay !!! Is this wrong way around?
-			if (cellValue === null) {
-				// OLD PLAYER MOVE INDICATOR CODE (Salvage for pathfinding maybe?)
-				// const deltaX = cellId % mapSize - playerLocation % mapSize;
-				// const deltaY = Math.floor(cellId / mapSize) - Math.floor(playerLocation / mapSize);
-				// if (!state.ctx.gameover && ((deltaX == 0) != (deltaY == 0))) { // Implements xor
-				// 	cell.textContent = "•";
-				// }
-				// else {
-				// 	cell.textContent = "";
-				// }
-				cell.textContent = "error";
-			}
-			else {
-				cell.textContent = cellValue;
-			}
-		});
+
+		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
+			// Get board size
+			const mapSize = state.G._mapSize * 3; // Each tile is 3x3
+			// Get all the board cells.
+			const cells = this.rootElement.querySelectorAll('.cell');
+			// Update cells to display the values in game state.
+			cells.forEach(cell => {
+				const cellID = parseInt(cell.dataset.id);
+				const cellValue = state.G.cells[cellID % mapSize][Math.floor(cellID / mapSize)]; // 2D array yay
+				if (cellValue === null) {
+					// OLD PLAYER MOVE INDICATOR CODE (Salvage for pathfinding maybe?)
+					// const deltaX = cellId % mapSize - playerLocation % mapSize;
+					// const deltaY = Math.floor(cellId / mapSize) - Math.floor(playerLocation / mapSize);
+					// if (!state.ctx.gameover && ((deltaX == 0) != (deltaY == 0))) { // Implements xor
+					// 	cell.textContent = "•";
+					// }
+					// else {
+					// 	cell.textContent = "";
+					// }
+					cell.textContent = "error";
+				}
+				else {
+					cell.textContent = cellValue;
+				}
+			});
+		}
+
 		// Get the gameover message element.
 		const messageEl = this.rootElement.querySelector('.winner');
 		// Update the element to show a winner if any.
