@@ -1,0 +1,50 @@
+Kiwi Kluedo Map Dictionary
+
+All Tiles have a name and direction. This is represented by it's ID.
+An ID will take the form <Name><Direction>, where the direction is the side that faces the inside of a building
+A simple horisontal wall can have two different IDs, the difference is which side "Inside" is. (The IDs in this case are WN and WS)
+You can either draw these IDs as the same solid wall, or a thin wall with carpet on the inside side (Or something)
+
+Examples: (ASCII art for reference only)
+
+...
+...	Outside (O)
+...
+
+░░░
+░░░	Inside (I)
+░░░
+
+...
+███	Wall with inside on south side (WS)
+░░░
+
+...
+█d█	Door with inside on south side (DS)
+░░░
+
+...
+.██	Corner with inside on south east side (CSE)
+.█░
+
+░░░
+░██	The same corner, but inverted. Inside now on north west side (CINW) (Corner Inverted North West)
+░█.
+
+You can represent these tiles however, the presented ASCII here is only for reference.
+The entire dictionary follows below:
+
+Non-wall tiles:
+Inside (I)
+Outside (O)
+Player (0,1,2 etc)
+
+Wall tiles:
+Wall (WN, WS, WW, WE)
+Door (DN, DS, DW, DE)
+Corner (CNW, CNE, CSW, CSE)
+Corner Inverted (CINW, CINE, CISW, CISE)
+
+More items may be added later.
+
+Defining a new room is a little weird right now. If you want to add more rooms, try and use these tile IDs in sets of 3x3 only. (So 3x6, 12x9 are all fine)
