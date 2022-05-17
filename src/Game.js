@@ -8,15 +8,18 @@ var ROOMNUM = 6; // Number of rooms to generate. Note this is FULL rooms, not ro
 
 var MOVESIZETEMP = 4; // Temporary variable for player movement
 
+var SAFETILES = ['O', 'I', 'DN', 'DS', 'DW', 'DE']; // Stores the tiles a player can stand on
+
 export const TestGame = {
 	setup: () => ({
 		_mapGenerated: false, // True once a map is generated
 		_mapSize: MAPSIZE,
 		_boardSize: MAPSIZE * 3, // 3x3 cells and all
 		_roomNum: ROOMNUM,
+		_safeTiles: SAFETILES, // So that frontend can access the same safe tiles that are assumed in backend
 		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
-		playerLocations: [], // Stores the location of players, so they can be found easily
-		diceRoll: null, // Stores the dice roll for the current turn
+		playerLocations: [], // Stores the location of players as [x,y] (These are drawn over the normal tiles)
+		diceRoll: [MOVESIZETEMP, null, null], // Stores the dice roll for the current turn. In format of [total, d1, d2]
 	}),
 	turn: {
 		minMoves: 1,
@@ -24,8 +27,10 @@ export const TestGame = {
 	},
 	moves: {
 		rollDice: (G, ctx) => {
-			// Rolls the dice and saves the result to G
-			G.diceRoll = Math.floor(Math.random() * 11) + 2; // Rolls two "dice," random number between 2 and 12
+			// Rolls 2 dice and saves the result to G in format of [total, d1, d2]
+			G.diceRoll[1] = Math.floor(Math.random() * 6) + 1; // Math.random() doesn't return 1, so this won't ever be 7 or anything dw
+			G.diceRoll[2] = Math.floor(Math.random() * 6) + 1;
+			G.diceRoll[0] = G.diceRoll[1] + G.diceRoll[2]; // Total
 		},
 		clickCell: (G, ctx, id) => {
 			if (!G._mapGenerated) {
@@ -34,20 +39,34 @@ export const TestGame = {
 
 			let idx = id % G._boardSize;
 			let idy = Math.floor(id / G._boardSize);
+			let targetCell = G.cells[idx][idy]; // Get the cell that was clicked
 
-			if (G.cells[idx][idy] !== ' ') { return INVALID_MOVE; } // Must be empty !!! Placing on walls?
+			let playerCanMove = false; // Begin checking if cell can be moved to
+			for (let ii = 0; ii < SAFETILES.length; ii++) { // Check if clicked cell is a safe tile to move to
+				if (targetCell == SAFETILES[ii]) {
+					playerCanMove = true; // Player CAN move here 
+					break;
+				}
+			}
+			for (let ii = 0; ii < G.playerLocations.length; ii++) { // Check if a player is already on this cell
+				if (idx == G.playerLocations[ii][0] && idy == G.playerLocations[ii][1]) {
+					playerCanMove = false; // Nevermind because player CANNOT move here
+					break;
+				}
+			}
+			if (!playerCanMove) {
+				return INVALID_MOVE; // Must be an empty tile
+			}
 
 			const player = ctx.currentPlayer;
 			const playerLocation = G.playerLocations[player];
 			const deltaX = idx - playerLocation[0];
 			const deltaY = idy - playerLocation[1];
 
-			console.log(Math.abs(deltaX) + Math.abs(deltaY));
+			if (Math.abs(deltaX) + Math.abs(deltaY) > G.diceRoll[0]) {
+				return INVALID_MOVE; // Must be close enough
+			}
 
-			if (Math.abs(deltaX) + Math.abs(deltaY) > MOVESIZETEMP) { return INVALID_MOVE; } // Must be close enough
-
-			G.cells[playerLocation[0]][playerLocation[1]] = ' '; // Remove player from old location
-			G.cells[idx][idy] = player; // Place player in new location
 			G.playerLocations[player] = [idx, idy]; // Save new player location
 
 		},
@@ -123,11 +142,10 @@ function GenerateEverything(G, ctx) {
 	for (let ii = 0; ii < ctx.numPlayers; ii++) {
 		let playerX = Math.floor(Math.random() * boardSize);
 		let playerY = Math.floor(Math.random() * boardSize);
-		while (Gmap[playerX][playerY] !== ' ') { // Ensure spot is clear
+		while (Gmap[playerX][playerY] !== 'O') { // Ensure spot is an outside tile
 			playerX = Math.floor(Math.random() * boardSize);
 			playerY = Math.floor(Math.random() * boardSize);
 		}
-		Gmap[playerX][playerY] = ii;
 		playerLocations[ii] = [playerX, playerY];
 	}
 
@@ -401,79 +419,79 @@ const outside = { // Generic tile
 	id: ' ',
 	sides: ["0", "0", "0", "0"],
 	weight: 2000, // The generator (The random one) will prefer to place this tile if given the option, but it will not have the option if more rooms are required first
-	walls: [[' ', ' ', ' '], [' ', ' ', ' '], [' ', ' ', ' ']]
+	walls: [['O', 'O', 'O'], ['O', 'O', 'O'], ['O', 'O', 'O']]
 };
 
 const roomLargeA1 = { // A large 2x2 room. Starting top left, then reading order.
 	id: 'a',
 	sides: ["0", "at", "al", "0"], // "at" as in a, top join. "al" as in a, left join etc.
 	weight: 60,
-	walls: [['█', 'o', '█'], ['█', ' ', ' '], ['█', ' ', '█']]
+	walls: [['CSE', 'DE', 'WE'], ['WS', 'I', 'I'], ['WS', 'I', 'I']]
 };
 const roomLargeA2 = {
 	id: 'a',
 	sides: ["0", "0", "ar", "at"],
 	weight: 60,
-	walls: [['█', ' ', '█'], ['o', ' ', ' '], ['█', '█', '█']]
+	walls: [['WS', 'I', 'I'], ['DS', 'I', 'I'], ['CSW', 'WW', 'WW']]
 };
 const roomLargeA3 = {
 	id: 'a',
 	sides: ["al", "ab", "0", "0"],
 	weight: 60,
-	walls: [['█', '█', '█'], [' ', ' ', 'o'], ['█', ' ', '█']]
+	walls: [['WE', 'WE', 'CNE'], ['I', 'I', 'DN'], ['I', 'I', 'WN']]
 };
 const roomLargeA4 = {
 	id: 'a',
 	sides: ["ar", "0", "0", "ab"],
 	weight: 60,
-	walls: [['█', ' ', '█'], [' ', ' ', '█'], ['█', 'o', '█']]
+	walls: [['I', 'I', 'WN'], ['I', 'I', 'WN'], ['WW', 'DW', 'CNW']]
 };
 
 const roomMediumB1 = { // A medium 1x2 room. Same order
 	id: 'b',
 	sides: ["0", "0", "b", "0"],
 	weight: 80,
-	walls: [['█', '█', '█'], ['█', ' ', ' '], ['█', 'o', '█']]
+	walls: [['CSE', 'WE', 'WE'], ['WS', 'I', 'I'], ['CSW', 'DW', 'WW']]
 };
 const roomMediumB2 = {
 	id: 'b',
 	sides: ["b", "0", "0", "0"],
 	weight: 80,
-	walls: [['█', 'o', '█'], [' ', ' ', '█'], ['█', '█', '█']]
+	walls: [['WE', 'DE', 'CNE'], ['I', 'I', 'WN'], ['WW', 'WW', 'CNW']]
 };
 
 const roomMediumC1 = { // A medium 2x1 room.
 	id: 'c',
 	sides: ["0", "c", "0", "0"],
 	weight: 80,
-	walls: [['█', 'o', '█'], ['█', ' ', '█'], ['█', ' ', '█']]
+	walls: [['CSE', 'DE', 'CNE'], ['WS', 'I', 'WN'], ['WS', 'I', 'WN']]
 };
 const roomMediumC2 = {
 	id: 'c',
 	sides: ["0", "0", "0", "c"],
 	weight: 80,
-	walls: [['█', ' ', '█'], ['o', ' ', 'o'], ['█', '█', '█']]
+	walls: [['WS', 'I', 'WN'], ['DS', 'I', 'DN'], ['CSW', 'WW', 'CNW']]
 };
 
 const roomSmallD1 = { // A small 1x1 room. Small rooms differ only by door placement
 	id: 'd',
 	sides: ["0", "0", "0", "0"],
 	weight: 100,
-	walls: [['█', 'o', '█'], ['o', ' ', '█'], ['█', '█', '█']]
+	walls: [['CSE', 'DE', 'CNE'], ['DS', 'I', 'WN'], ['CSW', 'WW', 'CNW']]
 };
 
 const roomSmallE1 = { // A small 1x1 room.
 	id: 'e',
 	sides: ["0", "0", "0", "0"],
 	weight: 100,
-	walls: [['█', '█', '█'], ['█', ' ', 'o'], ['█', 'o', '█']]
+	walls: [['CSE', 'WE', 'CNE'], ['WS', 'I', 'DN'], ['CSW', 'DW', 'CNW']]
 };
 
 const roomSmallF1 = { // A small 1x1 room.
 	id: 'f',
 	sides: ["0", "0", "0", "0"],
 	weight: 100,
-	walls: [['█', 'o', '█'], ['█', ' ', '█'], ['█', 'o', '█']]
+	walls: [['CSE', 'DE', 'CNE'], ['WS', 'I', 'WN'], ['CSW', 'DW', 'CNW']]
 };
 
 // Some constant lists for checking if a tile is in a certian category
