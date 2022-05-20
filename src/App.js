@@ -72,6 +72,9 @@ class TestGameClient {
 						containsPlayer = true;
 					}
 				}
+				if (state.G.playerLocations[state.ctx.currentPlayer][2]) { // If player is in a room
+					return; // End early (Don't draw valid move markers if player is in room)
+				}
 				if (state.G._safeTiles.includes(cellValue)) { // If the tile is a safe tile, check if move indicators should be drawn ("." for now)
 					const deltaX = Math.abs(cellCoords[0] - state.G.playerLocations[state.ctx.currentPlayer][0]); // Getting abs distance from current player to this tile
 					const deltaY = Math.abs(cellCoords[1] - state.G.playerLocations[state.ctx.currentPlayer][1]);

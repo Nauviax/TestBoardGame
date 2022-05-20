@@ -8,7 +8,7 @@ var ROOMNUM = 6; // Number of rooms to generate. Note this is FULL rooms, not ro
 
 var MOVESIZETEMP = 4; // Temporary variable for player movement
 
-var SAFETILES = ['O', 'I', 'DN', 'DS', 'DW', 'DE']; // Stores the tiles a player can stand on
+var SAFETILES = ['O', 'DN', 'DS', 'DW', 'DE']; // Stores the tiles a player can stand on
 
 export const TestGame = {
 	setup: () => ({ // Anything starting with an underscore will NOT change
@@ -23,8 +23,8 @@ export const TestGame = {
 		diceRoll: [MOVESIZETEMP, null, null], // Stores the dice roll for the current turn. In format of [total, d1, d2]
 	}),
 	turn: {
-		minMoves: 1,
-		maxMoves: 1,
+		// minMoves: 1,
+		// maxMoves: 2,
 	},
 	moves: {
 		rollDice: (G, ctx) => {
@@ -42,33 +42,62 @@ export const TestGame = {
 			let idy = Math.floor(id / G._boardSize);
 			let targetCell = G.cells[idx][idy]; // Get the cell that was clicked
 
-			let playerCanMove = false; // Begin checking if cell can be moved to
-			for (let ii = 0; ii < SAFETILES.length; ii++) { // Check if clicked cell is a safe tile to move to
-				if (targetCell == SAFETILES[ii]) {
-					playerCanMove = true; // Player CAN move here 
-					break;
-				}
-			}
-			for (let ii = 0; ii < G.playerLocations.length; ii++) { // Check if a player is already on this cell
-				if (idx == G.playerLocations[ii][0] && idy == G.playerLocations[ii][1]) {
-					playerCanMove = false; // Nevermind because player CANNOT move here
-					break;
-				}
-			}
-			if (!playerCanMove) {
-				return INVALID_MOVE; // Must be an empty tile
-			}
-
 			const player = ctx.currentPlayer;
 			const playerLocation = G.playerLocations[player];
-			const deltaX = idx - playerLocation[0];
-			const deltaY = idy - playerLocation[1];
 
-			if (Math.abs(deltaX) + Math.abs(deltaY) > G.diceRoll[0]) {
-				return INVALID_MOVE; // Must be close enough
+			// Check if player is in a room
+			if (playerLocation[2]) { // Player is trying to leave a room
+				let doors = G._roomList[playerLocation[3]][3]; // Get the doors of the room
+				for (let ii = 0; ii < doors.length; ii++) { // Loop through the doors
+					if (doors[ii][0] == idx && doors[ii][1] == idy) { // If the door is clicked
+						G.playerLocations[player] = [idx, idy, false, null]; // Update player location
+						return;
+					}
+				}
+				return INVALID_MOVE; // If the player is trying to leave a room, but didn't click a door, return invalid move
+			} else { // Player is moving around the map
+				let playerCanMove = false; // Begin checking if cell can be moved to
+				for (let ii = 0; ii < SAFETILES.length; ii++) { // Check if clicked cell is a safe tile to move to
+					if (targetCell == SAFETILES[ii]) {
+						playerCanMove = true; // Player CAN move here 
+						break;
+					}
+				}
+				for (let ii = 0; ii < G.playerLocations.length; ii++) { // Check if a player is already on this cell
+					if (idx == G.playerLocations[ii][0] && idy == G.playerLocations[ii][1]) {
+						playerCanMove = false; // Nevermind because player CANNOT move here
+						break;
+					}
+				}
+				if (!playerCanMove) {
+					return INVALID_MOVE; // Must be an empty tile
+				}
+
+				const deltaX = idx - playerLocation[0];
+				const deltaY = idy - playerLocation[1];
+
+				if (Math.abs(deltaX) + Math.abs(deltaY) > G.diceRoll[0]) {
+					return INVALID_MOVE; // Must be close enough
+				}
+
+				// At this point, player is assumed to be able to move to this cell
+
+				if (targetCell == 'DN' || targetCell == 'DS' || targetCell == 'DW' || targetCell == 'DE') { // If the cell is a door
+					for (let ii = 0; ii < G._roomList.length; ii++) { // Loop through the rooms
+						let doors = G._roomList[ii][3]; // Get the doors of the room
+						for (let jj = 0; jj < doors.length; jj++) { // Loop through the doors
+							if (doors[jj][0] == idx && doors[jj][1] == idy) { // If the door is clicked
+								G.playerLocations[player] = [null, null, true, G._roomList[ii][0]]; // Update player location to new room
+								G.diceRoll[0] -= Math.abs(deltaX) + Math.abs(deltaY); // Update dice roll
+								return; // We're done
+							}
+						}
+					}
+				} else { // If player clicked a normal tile (Again we checked if it was safe earlier)
+					G.playerLocations[player] = [idx, idy, false, null]; // Save new player location
+					G.diceRoll[0] -= Math.abs(deltaX) + Math.abs(deltaY); // Update dice roll
+				}
 			}
-
-			G.playerLocations[player] = [idx, idy]; // Save new player location
 
 		},
 	},
