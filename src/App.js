@@ -62,7 +62,31 @@ class TestGameClient {
 				cell.textContent = cellValue; // Update cell text
 
 				if (cellValue == "O" || cellValue == "I") { // If cell is an empty tile, actually draw a blank char
-					cell.textContent = ""; // This is temporary !!!
+					cell.innerHTML = "<img src='https://cdn5.vectorstock.com/i/thumb-large/34/64/wood-brown-floor-tiles-pattern-seamless-texture-vector-23543464.jpg' alt='wall' style='width:50px; height:50px; object-fit: fill;'/>";
+				}
+				else if (cellValue == "WN" || cellValue == "WS"){ //If the cell is a horizontal wall
+					cell.innerHTML = "<img src='https://s3images.coroflot.com/user_files/individual_files/692560_ytkzazsdwnfzsxcu7afmnraf8.png' alt='wall' style='width:50px; height:50px; object-fit: fill;'/>";
+				}
+				else if (cellValue == "WE" || cellValue == "WW"){ //If the cell is a vertical wall
+					
+				}
+				else if (cellValue == "DN" || cellValue == "DS"){ //If the cell is a horizontal door		
+
+				}
+				else if (cellValue == "DW" || cellValue == "DE"){ //If the cell is a vertical door
+					
+				}
+				else if (cellValue == "CNW" || cellValue == "CNE"){ //If the cell is a corner north wall
+					
+				}
+				else if (cellValue == "CSW" || cellValue == "CSE"){ //If the cell is a corner south wall
+					
+				}
+				else if (cellValue == "CINW" || cellValue == "CINE"){ //If the cell is a corner inside north wall
+					
+				}
+				else if (cellValue == "CISW" || cellValue == "CISE"){ //If the cell is a corner inside south wall
+					
 				}
 
 				let containsPlayer = false; // True if cell contains a player (Used to draw valid move markers) (This is temporary, feel free to change this)
