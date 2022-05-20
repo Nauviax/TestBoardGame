@@ -11,14 +11,15 @@ var MOVESIZETEMP = 4; // Temporary variable for player movement
 var SAFETILES = ['O', 'I', 'DN', 'DS', 'DW', 'DE']; // Stores the tiles a player can stand on
 
 export const TestGame = {
-	setup: () => ({
+	setup: () => ({ // Anything starting with an underscore will NOT change
 		_mapGenerated: false, // True once a map is generated
 		_mapSize: MAPSIZE,
 		_boardSize: MAPSIZE * 3, // 3x3 cells and all
 		_roomNum: ROOMNUM,
 		_safeTiles: SAFETILES, // So that frontend can access the same safe tiles that are assumed in backend
+		_roomList: null, // List of rooms, form is [roomID, tileID, [tileList], [doorList]], where any coordinate in tile/door list is relative to G.cells
 		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
-		playerLocations: [], // Stores the location of players as [x,y] (These are drawn over the normal tiles)
+		playerLocations: [], // Stores the location of players as [x,y,inRoom,roomID] (These are drawn over the normal tiles) (These values are always "last seen," read inRoom to see which is up to date; roomID or (x,y))
 		diceRoll: [MOVESIZETEMP, null, null], // Stores the dice roll for the current turn. In format of [total, d1, d2]
 	}),
 	turn: {
@@ -128,7 +129,7 @@ function GenerateEverything(G, ctx) {
 		}
 	}
 
-	// Print id map to console
+	// Print id map to console for debugging
 	for (let ii = 0; ii < mapSize; ii++) {
 		var row = '';
 		for (let jj = 0; jj < mapSize; jj++) {
@@ -137,7 +138,7 @@ function GenerateEverything(G, ctx) {
 		console.log(row);
 	}
 
-	// Place all players in empty spots on the map and save their positions as [x,y]
+	// Place all players in empty spots on the map and save their positions as [x,y] (Plus empty room data)
 	let playerLocations = [];
 	for (let ii = 0; ii < ctx.numPlayers; ii++) {
 		let playerX = Math.floor(Math.random() * boardSize);
@@ -146,23 +147,38 @@ function GenerateEverything(G, ctx) {
 			playerX = Math.floor(Math.random() * boardSize);
 			playerY = Math.floor(Math.random() * boardSize);
 		}
-		playerLocations[ii] = [playerX, playerY];
+		playerLocations[ii] = [playerX, playerY, false, -1]; // Save player location, with -1 room ID
+	}
+
+	// Generate a list of rooms, and save their index in the list to each room tile in GAMEMAP
+	let roomList = [];
+	let curIndex = 0; // Keeps track of room IDs
+	for (let ii = 0; ii < mapSize; ii++) { // YES mapSize, not boardSize
+		for (let jj = 0; jj < mapSize; jj++) {
+			if (GAMEMAP[ii][jj].tile.id != ' ') { // If this tile is not empty
+				if (GAMEMAP[ii][jj].roomID == null) { // If this room does not yet have a roomID
+					roomList[curIndex] = [curIndex, null, [], []]; // Create a new room entry. Again, form is [roomID, tileID, [tileList], [doorList]], where any coordinate is relative to G.cells
+					roomList = SetRoom(roomList, curIndex, GAMEMAP, ii, jj); // Sets the current tile to be this room, and all similar adjacent tiles to this room
+					curIndex++; // Increment room ID
+				}
+			}
+		}
+	}
+
+	// More debugging
+	for (let ii = 0; ii < mapSize; ii++) {
+		var row = '';
+		for (let jj = 0; jj < mapSize; jj++) {
+			row += GAMEMAP[jj][ii].roomID == null ? '.' : GAMEMAP[jj][ii].roomID;
+		}
+		console.log(row);
 	}
 
 	G.playerLocations = playerLocations;
+	G._roomList = roomList; // For use when looking for room data (Groups of room tiles)
 	G.cells = Gmap;
 	G._mapGenerated = true; // Let's see if this works
 }
-
-
-
-
-
-
-
-
-
-
 
 
 // Generation code below
@@ -275,7 +291,7 @@ function UpdateTile(tile, map, mapSize, depth) {
 		tile.tileList = [];
 		stateChanged = true;
 	}
-	else { // If this tile has multiple options, check each direction and remove my tiles that don't fit
+	else { // If this tile has multiple options, check each direction and remove my tiles that don't fit (New rules for '0' and '0r' which makes this whole thing longer)
 
 		// This gets ugly, but it's basically the same code 4 times in a row, with different directions
 
@@ -287,13 +303,29 @@ function UpdateTile(tile, map, mapSize, depth) {
 				let aboveTile = map[tile.x][tile.y - 1];
 				if (aboveTile.tile != null) { // If the tile above has a tile, check if it's side matches this side
 					if (aboveTile.tile.sides[2] != myTileOption.sides[0]) { // If the sides don't match, remove this tile option
-						remove = true;
+						if (aboveTile.tile.sides[2] + 'r' == myTileOption.sides[0] || aboveTile.tile.sides[2] == myTileOption.sides[0] + 'r') { // Unless they are '0' and '0r'
+							remove = false; // Basically do nothing, this pair matches
+						} else {
+							remove = true; // Remove this tile option
+						}
+					}
+					else { // If they do match, check they aren't '0r'
+						if (myTileOption.sides[0] == "0r") { // If this tile is a room, and the tile above is a room, they don't match
+							remove = true; // Bad pair, remove this tile option
+						}
 					}
 				}
 				else { // Otherwise, loop through this tiles options and see if at least one tile is compatible. If not, remove this tile option
 					remove = true; // Default to removing this tile, unless at least one tile is compatible
 					for (let jj = 0; jj < aboveTile.tileList.length; jj++) {
 						if (aboveTile.tileList[jj].sides[2] == myTileOption.sides[0]) { // If the tile is compatible, stop checking
+							if (myTileOption.sides[0] == "0r") { // If this tile is a room, and the tile above is a room, they don't match
+								continue; // Leave remove as true (This pair don't match)
+							}
+							remove = false; // The tile is saved, yay
+							break;
+						}
+						if (aboveTile.tileList[jj].sides[2] + 'r' == myTileOption.sides[0] || aboveTile.tileList[jj].sides[2] == myTileOption.sides[0] + 'r') { // Outside tiles are handled differently now. '0' and '0r' are compatible
 							remove = false; // The tile is saved, yay
 							break;
 						}
@@ -311,13 +343,28 @@ function UpdateTile(tile, map, mapSize, depth) {
 				let belowTile = map[tile.x][tile.y + 1];
 				if (belowTile.tile != null) { // If the tile below has a tile, check if it's side matches this side
 					if (belowTile.tile.sides[0] != myTileOption.sides[2]) { // If the sides don't match, remove this tile option
-						remove = true;
+						if (belowTile.tile.sides[0] + 'r' == myTileOption.sides[2] || belowTile.tile.sides[0] == myTileOption.sides[2] + 'r') { // Unless they are '0' and '0r'
+							remove = false; // Basically do nothing, this pair matches
+						} else {
+							remove = true; // Remove this tile option
+						}
+					} else { // If they do match, check they aren't '0r'
+						if (myTileOption.sides[2] == "0r") { // If this tile is a room, and the tile below is a room, they don't match
+							remove = true; // Bad pair, remove this tile option
+						}
 					}
 				}
 				else { // Otherwise, loop through this tiles options and see if at least one tile is compatible. If not, remove this tile option
 					remove = true; // Default to removing this tile, unless at least one tile is compatible
 					for (let jj = 0; jj < belowTile.tileList.length; jj++) {
 						if (belowTile.tileList[jj].sides[0] == myTileOption.sides[2]) { // If the tile is compatible, stop checking
+							if (myTileOption.sides[2] == "0r") { // If this tile is a room, and the tile below is a room, they don't match
+								continue; // Leave remove as true (This pair don't match)
+							}
+							remove = false; // The tile is saved, yay
+							break;
+						}
+						if (belowTile.tileList[jj].sides[0] + 'r' == myTileOption.sides[2] || belowTile.tileList[jj].sides[0] == myTileOption.sides[2] + 'r') { // Outside tiles are handled differently now. '0' and '0r' are compatible
 							remove = false; // The tile is saved, yay
 							break;
 						}
@@ -335,13 +382,28 @@ function UpdateTile(tile, map, mapSize, depth) {
 				let leftTile = map[tile.x - 1][tile.y];
 				if (leftTile.tile != null) { // If the tile left has a tile, check if it's side matches this side
 					if (leftTile.tile.sides[1] != myTileOption.sides[3]) { // If the sides don't match, remove this tile option
-						remove = true;
+						if (leftTile.tile.sides[1] + 'r' == myTileOption.sides[3] || leftTile.tile.sides[1] == myTileOption.sides[3] + 'r') { // Unless they are '0' and '0r'
+							remove = false; // Basically do nothing, this pair matches
+						} else {
+							remove = true; // Remove this tile option
+						}
+					} else { // If they do match, check they aren't '0r'
+						if (myTileOption.sides[3] == "0r") { // If this tile is a room, and the tile left is a room, they don't match
+							remove = true; // Bad pair, remove this tile option
+						}
 					}
 				}
 				else { // Otherwise, loop through this tiles options and see if at least one tile is compatible. If not, remove this tile option
 					remove = true; // Default to removing this tile, unless at least one tile is compatible
 					for (let jj = 0; jj < leftTile.tileList.length; jj++) {
 						if (leftTile.tileList[jj].sides[1] == myTileOption.sides[3]) { // If the tile is compatible, stop checking
+							if (myTileOption.sides[3] == "0r") { // If this tile is a room, and the tile left is a room, they don't match
+								continue; // Leave remove as true (This pair don't match)
+							}
+							remove = false; // The tile is saved, yay
+							break;
+						}
+						if (leftTile.tileList[jj].sides[1] + 'r' == myTileOption.sides[3] || leftTile.tileList[jj].sides[1] == myTileOption.sides[3] + 'r') { // Outside tiles are handled differently now. '0' and '0r' are compatible
 							remove = false; // The tile is saved, yay
 							break;
 						}
@@ -359,13 +421,28 @@ function UpdateTile(tile, map, mapSize, depth) {
 				let rightTile = map[tile.x + 1][tile.y];
 				if (rightTile.tile != null) { // If the tile right has a tile, check if it's side matches this side
 					if (rightTile.tile.sides[3] != myTileOption.sides[1]) { // If the sides don't match, remove this tile option
-						remove = true;
+						if (rightTile.tile.sides[3] + 'r' == myTileOption.sides[1] || rightTile.tile.sides[3] == myTileOption.sides[1] + 'r') { // Unless they are '0' and '0r'
+							remove = false; // Basically do nothing, this pair matches
+						} else {
+							remove = true; // Remove this tile option
+						}
+					} else { // If they do match, check they aren't '0r'
+						if (myTileOption.sides[1] == "0r") { // If this tile is a room, and the tile right is a room, they don't match
+							remove = true; // Bad pair, remove this tile option
+						}
 					}
 				}
 				else { // Otherwise, loop through this tiles options and see if at least one tile is compatible. If not, remove this tile option
 					remove = true; // Default to removing this tile, unless at least one tile is compatible
 					for (let jj = 0; jj < rightTile.tileList.length; jj++) {
 						if (rightTile.tileList[jj].sides[3] == myTileOption.sides[1]) { // If the tile is compatible, stop checking
+							if (myTileOption.sides[1] == "0r") { // If this tile is a room, and the tile right is a room, they don't match
+								continue; // Leave remove as true (This pair don't match)
+							}
+							remove = false; // The tile is saved, yay
+							break;
+						}
+						if (rightTile.tileList[jj].sides[3] + 'r' == myTileOption.sides[1] || rightTile.tileList[jj].sides[3] == myTileOption.sides[1] + 'r') { // Outside tiles are handled differently now. '0' and '0r' are compatible
 							remove = false; // The tile is saved, yay
 							break;
 						}
@@ -402,6 +479,48 @@ function UpdateTile(tile, map, mapSize, depth) {
 	return true; // Successful update
 }
 
+function SetRoom(RoomList, curIndex, GAMEMAP, xx, yy) { // Sets the current room to the given RoomData ID, adds the room to RoomData, then recursively checks for ajacent rooms that are likely the same room
+	// Form is[roomID, tileID, [tileList], [doorList]], where any coordinate is relative to G.cells
+	RoomList[curIndex][2].push([xx * 3, yy * 3]); // Add the current tile coords to the room (Coords are top left of tile, in G.cells space)
+	if (RoomList[curIndex][1] == null) { // If the room still needs a tileID
+		RoomList[curIndex][1] = GAMEMAP[xx][yy].tile.id; // Set the tileID to the first tile in the room
+	}
+
+	// Add any doors to the rooms list of doors (Coordinates are given relative to G.cells)
+	for (let ii = 0; ii < 3; ii++) {
+		for (let jj = 0; jj < 3; jj++) {
+			let cell = GAMEMAP[xx][yy].tile.walls[ii][jj]; // One of the nine cells that make up this tile
+			if (cell == 'DN' || cell == 'DS' || cell == 'DW' || cell == 'DE') { // If the cell is a door
+				RoomList[curIndex][3].push([xx * 3 + ii, yy * 3 + jj]); // Save the literal door coordinates, relative to G.cells 
+			}
+		}
+	}
+
+	// Check the surrounding tiles for more room
+	GAMEMAP[xx][yy].roomID = RoomList[curIndex][0]; // Set the room ID for this tile. Among other things, it means it won't be checked again
+	if (xx != 0) { // If not on the left edge, check the left tile. If it has the same tileID
+		if (GAMEMAP[xx - 1][yy].tile.id == RoomList[curIndex][1] && GAMEMAP[xx - 1][yy].roomID == null) { // If the tile is the same as the roomID, and it is not already in a room
+			RoomList = SetRoom(RoomList, curIndex, GAMEMAP, xx - 1, yy); // Recursively check the left tile
+		}
+	}
+	if (xx != GAMEMAP.length - 1) { // If not on the right edge, check the right tile. If it has the same tileID
+		if (GAMEMAP[xx + 1][yy].tile.id == RoomList[curIndex][1] && GAMEMAP[xx + 1][yy].roomID == null) { // If the tile is the same as the roomID, and it is not already in a room
+			RoomList = SetRoom(RoomList, curIndex, GAMEMAP, xx + 1, yy); // Recursively check the right tile
+		}
+	}
+	if (yy != 0) { // If not on the top edge, check the top tile. If it has the same tileID
+		if (GAMEMAP[xx][yy - 1].tile.id == RoomList[curIndex][1] && GAMEMAP[xx][yy - 1].roomID == null) { // If the tile is the same as the roomID, and it is not already in a room
+			RoomList = SetRoom(RoomList, curIndex, GAMEMAP, xx, yy - 1); // Recursively check the top tile
+		}
+	}
+	if (yy != GAMEMAP.length - 1) { // If not on the bottom edge, check the bottom tile. If it has the same tileID
+		if (GAMEMAP[xx][yy + 1].tile.id == RoomList[curIndex][1] && GAMEMAP[xx][yy + 1].roomID == null) { // If the tile is the same as the roomID, and it is not already in a room
+			RoomList = SetRoom(RoomList, curIndex, GAMEMAP, xx, yy + 1); // Recursively check the bottom tile
+		}
+	}
+	return RoomList;
+}
+
 
 // Map tiles below
 
@@ -410,7 +529,9 @@ function CellData(x, y, tile = null) { // Stores the possible tiles for a cell, 
 	this.tileList = [outside, roomLargeA1, roomLargeA2, roomLargeA3, roomLargeA4, roomMediumB1, roomMediumB2, roomMediumC1, roomMediumC2, roomSmallD1, roomSmallE1, roomSmallF1];
 	this.x = x;
 	this.y = y;
+	this.roomID = null;
 }
+
 
 // A list of all the below objects, to be copied to each cell during generation. (Array order is top side first, then clockwise)
 
@@ -424,72 +545,72 @@ const outside = { // Generic tile
 
 const roomLargeA1 = { // A large 2x2 room. Starting top left, then reading order.
 	id: 'a',
-	sides: ["0", "at", "al", "0"], // "at" as in a, top join. "al" as in a, left join etc.
+	sides: ["0r", "at", "al", "0r"], // "at" as in a, top join. "al" as in a, left join etc.
 	weight: 60,
 	walls: [['CSE', 'DE', 'WE'], ['WS', 'I', 'I'], ['WS', 'I', 'I']]
 };
 const roomLargeA2 = {
 	id: 'a',
-	sides: ["0", "0", "ar", "at"],
+	sides: ["0r", "0r", "ar", "at"],
 	weight: 60,
 	walls: [['WS', 'I', 'I'], ['DS', 'I', 'I'], ['CSW', 'WW', 'WW']]
 };
 const roomLargeA3 = {
 	id: 'a',
-	sides: ["al", "ab", "0", "0"],
+	sides: ["al", "ab", "0r", "0r"],
 	weight: 60,
 	walls: [['WE', 'WE', 'CNE'], ['I', 'I', 'DN'], ['I', 'I', 'WN']]
 };
 const roomLargeA4 = {
 	id: 'a',
-	sides: ["ar", "0", "0", "ab"],
+	sides: ["ar", "0r", "0r", "ab"],
 	weight: 60,
 	walls: [['I', 'I', 'WN'], ['I', 'I', 'WN'], ['WW', 'DW', 'CNW']]
 };
 
 const roomMediumB1 = { // A medium 1x2 room. Same order
 	id: 'b',
-	sides: ["0", "0", "b", "0"],
+	sides: ["0r", "0r", "b", "0r"],
 	weight: 80,
 	walls: [['CSE', 'WE', 'WE'], ['WS', 'I', 'I'], ['CSW', 'DW', 'WW']]
 };
 const roomMediumB2 = {
 	id: 'b',
-	sides: ["b", "0", "0", "0"],
+	sides: ["b", "0r", "0r", "0r"],
 	weight: 80,
 	walls: [['WE', 'DE', 'CNE'], ['I', 'I', 'WN'], ['WW', 'WW', 'CNW']]
 };
 
 const roomMediumC1 = { // A medium 2x1 room.
 	id: 'c',
-	sides: ["0", "c", "0", "0"],
+	sides: ["0r", "c", "0r", "0r"],
 	weight: 80,
 	walls: [['CSE', 'DE', 'CNE'], ['WS', 'I', 'WN'], ['WS', 'I', 'WN']]
 };
 const roomMediumC2 = {
 	id: 'c',
-	sides: ["0", "0", "0", "c"],
+	sides: ["0r", "0r", "0r", "c"],
 	weight: 80,
 	walls: [['WS', 'I', 'WN'], ['DS', 'I', 'DN'], ['CSW', 'WW', 'CNW']]
 };
 
 const roomSmallD1 = { // A small 1x1 room. Small rooms differ only by door placement
 	id: 'd',
-	sides: ["0", "0", "0", "0"],
+	sides: ["0r", "0r", "0r", "0r"],
 	weight: 100,
 	walls: [['CSE', 'DE', 'CNE'], ['DS', 'I', 'WN'], ['CSW', 'WW', 'CNW']]
 };
 
 const roomSmallE1 = { // A small 1x1 room.
 	id: 'e',
-	sides: ["0", "0", "0", "0"],
+	sides: ["0r", "0r", "0r", "0r"],
 	weight: 100,
 	walls: [['CSE', 'WE', 'CNE'], ['WS', 'I', 'DN'], ['CSW', 'DW', 'CNW']]
 };
 
 const roomSmallF1 = { // A small 1x1 room.
 	id: 'f',
-	sides: ["0", "0", "0", "0"],
+	sides: ["0r", "0r", "0r", "0r"],
 	weight: 100,
 	walls: [['CSE', 'DE', 'CNE'], ['WS', 'I', 'WN'], ['CSW', 'DW', 'CNW']]
 };
