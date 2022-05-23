@@ -1,16 +1,50 @@
 import { Client } from 'boardgame.io/client';
 import { TestGame } from './Game';
+import { SocketIO } from 'boardgame.io/multiplayer';
 
 var InitialMapGenerated = false;
 
+function SplashScreen(rootElement) {
+	console.log("Displaying splash screen");
+	return new Promise((resolve) => {
+	  const createButton = (playerID) => {
+		const button = document.createElement('button');
+		button.textContent = 'Player ' + playerID;
+		button.onclick = () => resolve(playerID);
+		rootElement.append(button);
+	  };
+	  rootElement.innerHTML = ` <p>Play as</p>`;
+	  const playerIDs = ['0', '1'];
+	  playerIDs.forEach(createButton);
+	});
+}
+
 // To launch this app, type 'npm start' into a console
 class TestGameClient {
-	constructor(rootElement) {
-		this.client = Client({ game: TestGame });
+	constructor(rootElement, { playerID } = {}) {
+		this.client = Client({ 
+			game: TestGame,
+			multiplayer: SocketIO({ server: 'localhost:8080' }),
+			playerID, 
+		});
+		this.connected = false;
 		this.client.start();
 		this.rootElement = rootElement;
 		this.client.subscribe(state => this.update(state));
-		this.attachListeners();
+		// this.attachListeners();
+	}
+
+	onConnecting() {
+		this.connected = false;
+		this.showConnecting();
+	}
+	
+	onConnected() {
+		this.connected = true;
+	}
+	
+	showConnecting() {
+		this.rootElement.innerHTML = '<p>connecting…</p>';
 	}
 
 	createBoard(state) {
@@ -27,7 +61,8 @@ class TestGameClient {
 		}
 
 		// Add the HTML to our app <div>.
-		this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
+		//this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
+		this.rootElement.innerHTML = `<h2>Player ${this.client.playerID}</h2><table>${rows.join('')}</table><p class="winner"></p>`;
 	}
 
 	attachListeners() {
@@ -44,8 +79,16 @@ class TestGameClient {
 	}
 
 	update(state) {
+		if (state === null) {
+			this.onConnecting();
+			return;
+		} else if (!this.connected) {
+			this.onConnected();
+		}
+
 		if (!InitialMapGenerated) { // Create cells on the screen on first update
 			this.createBoard(state);
+			this.attachListeners();
 			InitialMapGenerated = true;
 		}
 
@@ -98,5 +141,14 @@ class TestGameClient {
 	}
 }
 
+class App {
+	constructor(rootElement) {
+	  this.client = SplashScreen(rootElement).then((playerID) => {
+		return new TestGameClient(rootElement, { playerID });
+	  });
+	}
+}
+
+console.log("Creating App");
 const appElement = document.getElementById('app');
-const app = new TestGameClient(appElement);
+new App(appElement);
