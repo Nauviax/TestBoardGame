@@ -68,25 +68,25 @@ class TestGameClient {
 					cell.innerHTML = "<img src='https://s3images.coroflot.com/user_files/individual_files/692560_ytkzazsdwnfzsxcu7afmnraf8.png' alt='wall' style='width:50px; height:50px; object-fit: fill;'/>";
 				}
 				else if (cellValue == "WE" || cellValue == "WW"){ //If the cell is a vertical wall
-					
+					cell.innerHTML = "<img src='https://s3images.coroflot.com/user_files/individual_files/692560_ytkzazsdwnfzsxcu7afmnraf8.png' alt='wall' style='width:50px; height:50px; object-fit: fill;'/>";
 				}
 				else if (cellValue == "DN" || cellValue == "DS"){ //If the cell is a horizontal door		
-
+					cell.innerHTML = "<img src='' alt='Door' style='width:50px; height:50px; object-fit: fill;'/>";
 				}
 				else if (cellValue == "DW" || cellValue == "DE"){ //If the cell is a vertical door
-					
+					cell.innerHTML = "<img src='https://' alt='Door' style='width:50px; height:50px; object-fit: fill;'/>";
 				}
 				else if (cellValue == "CNW" || cellValue == "CNE"){ //If the cell is a corner north wall
-					
+					cell.innerHTML = "<img src='https://s3images.coroflot.com/user_files/individual_files/692560_ytkzazsdwnfzsxcu7afmnraf8.png' alt='wall' style='width:50px; height:50px; object-fit: fill;'/>";
 				}
 				else if (cellValue == "CSW" || cellValue == "CSE"){ //If the cell is a corner south wall
-					
+					cell.innerHTML = "<img src='https://s3images.coroflot.com/user_files/individual_files/692560_ytkzazsdwnfzsxcu7afmnraf8.png' alt='wall' style='width:50px; height:50px; object-fit: fill;'/>";
 				}
 				else if (cellValue == "CINW" || cellValue == "CINE"){ //If the cell is a corner inside north wall
-					
+					cell.innerHTML = "<img src='https://s3images.coroflot.com/user_files/individual_files/692560_ytkzazsdwnfzsxcu7afmnraf8.png' alt='wall' style='width:50px; height:50px; object-fit: fill;'/>";
 				}
 				else if (cellValue == "CISW" || cellValue == "CISE"){ //If the cell is a corner inside south wall
-					
+					cell.innerHTML = "<img src='https://s3images.coroflot.com/user_files/individual_files/692560_ytkzazsdwnfzsxcu7afmnraf8.png' alt='wall' style='width:50px; height:50px; object-fit: fill;'/>";
 				}
 
 				let containsPlayer = false; // True if cell contains a player (Used to draw valid move markers) (This is temporary, feel free to change this)
