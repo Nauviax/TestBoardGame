@@ -11,7 +11,7 @@ npm install
 
 In one terminal tab, start the multiplayer server:
 ```
-npm start serve
+npm run serve
 ```
 Start a second terminal tab, and run the game code:
 ```
