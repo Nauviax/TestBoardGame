@@ -26,9 +26,9 @@ export const TestGame = {
 		_mapGenerated: false, // True once a map is generated
 		_mapSize: MAPSIZE,
 		_boardSize: MAPSIZE * 3, // 3x3 cells and all
+		_charNum: CHARNUM, // The number of characters in the game (NOT PLAYERS)
 		_roomNum: ROOMNUM, // Number of rooms to generate
 		_itemNum: ITEMNUM, // The number of items in the game
-		_charNum: CHARNUM, // The number of characters in the game (NOT PLAYERS)
 		_safeTiles: SAFETILES, // So that frontend can access the same safe tiles that are assumed in backend
 		_roomList: null, // List of rooms, form is [roomID, tileID, [tileList], [doorList]], where any coordinate in tile/door list is relative to G.cells
 		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
@@ -37,10 +37,13 @@ export const TestGame = {
 		_startingInventories: [], // Stores the starting inventories of players, in format of [[[characters],[rooms],[items]], [...], etc] (Each index is a player)
 		_answer: null, // Stores the final solution of the game. Same format: [[characters], [rooms], [items]]
 		_cardsInPlay: [], // Stores a list of every card currently in this game. Same format: [[characters], [rooms], [items]] (THIS INCLUDES ROOM NAMES, the length should be equal to _roomNum, and can be treated as in order)
-		_winner: null, // Stores the winner of the game. Uses player index/id
+		winner: null, // Stores the winner of the game. Uses player index/id
+		losers: [], // Stores the losers of the game. List of true/false values, false if the player is still playing, true if they accused wrongly and are out.
+		querryOutput: [null, null, null], // Stores the output of the querry move, in format of [player, type(1,2,3), value] where type 1 reffers to character, type 2 reffers to room, and type 3 reffers to item
 	}),
 	turn: {
-		onBegin: (G, ctx) => (BeginTurn(G)), // Runs before each turn. Currently resets dice roll
+		onBegin: (G, ctx) => (BeginTurn(G, ctx)), // Runs before each turn. Currently resets dice roll
+		endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out\
 	},
 	moves: {
 		rollDice: {
@@ -125,6 +128,48 @@ export const TestGame = {
 				}
 
 			},
+		},
+		askPlayersQuestion: { // Querry output should be read from state after making this move, and shown to the player visually. No backend code is implemented to show the player anything.
+			move: (G, ctx, character, room, item) => {
+				if (!G.playerLocations[ctx.currentPlayer][2]) { // If player is not even in a room
+					console.log('Player is not in a room');
+					return INVALID_MOVE; // Bad player, bad
+				}
+				let curRoom = G.playerLocations[ctx.currentPlayer][3]; // Get the current room index
+				let curRoomName = G._cardsInPlay[1][curRoom]; // Get the current room name
+				if (curRoomName == room) { // If the player is in the querried room,
+					let curIndex = (parseInt(ctx.currentPlayer) + 1) % ctx.numPlayers;
+					console.log("Checking player: " + curIndex);
+					while (curIndex != ctx.currentPlayer) {
+						let output = QuerryPlayerInv(G, curIndex, character, room, item);
+						if (output[0] != 0) { // If the player has one of the querried items
+							G.querryOutput = [curIndex, output[0], output[1]]; // Save the output of the querry
+							return;
+						}
+						curIndex = (curIndex + 1) % ctx.numPlayers; // Loop around
+					}
+					console.log("Items not found"); // No players had these items. Player should make an accusation, assuming they didn't querry one of their own items
+					G.querryOutput = [null, 0, null];
+					return;
+				}
+				else {
+					console.log("Player is not in the querried room. Room name: " + curRoomName + " Querried room: " + room);
+					return INVALID_MOVE; // If the player is not in the room, they can't speak the question
+				}
+			}
+		},
+		allOrNothing: { // You can check if a player is out of the game via state, G.losers. Same goes for the winner, which is a single value with the player index in it.
+			noLimit: true, // But they will be out of the game if it's wrong, and the game is over if it's right
+			move: (G, ctx, character, room, item) => {
+				// Player does NOT need to be in the room. If the accusation is correct, set winner. Otherwise set loser.
+				if (character == G._answer[0] && room == G._answer[1] && item == G._answer[2]) {
+					G.winner = ctx.currentPlayer; // "endIf" will trigger next, and run the end game function
+					console.log('Player wins!');
+				} else {
+					G.losers[ctx.currentPlayer] = true; // Big sad, player is now out of the game. Other players only know that the guess is wrong, not which parts.
+					console.log('Player Loses!');
+				}
+			}
 		}
 	},
 	phases: {
@@ -136,9 +181,10 @@ export const TestGame = {
 			start: true,
 		},
 	},
-	endIf: (G, ctx) => { // End the game if a player has won
+	endIf: (G, ctx) => { // End the game if a player has won !!! THIS ISN'T TRIGGERING YET !!!
 		let winner = G._winner;
-		if (winner !== null) {
+		if (winner != null && winner != undefined) {
+			console.log("Game Over! Winner is player " + winner);
 			return { winner };
 		}
 	},
@@ -171,26 +217,27 @@ function DealInventories(G, ctx) { // Deals the inventories of each player, and 
 		}
 		roomNames = roomNames.concat(roomNames); // Length is now doubled
 	}
-	// Remove values randomly until there are the correct number of characters, items and rooms
-	while (charNames.length > G._charNum) {
-		charNames.splice(Math.floor(Math.random() * charNames.length), 1);
-	}
-	while (itemNames.length > G._itemNum) {
-		itemNames.splice(Math.floor(Math.random() * itemNames.length), 1);
-	}
-	while (roomNames.length > G._roomNum) {
-		roomNames.splice(Math.floor(Math.random() * roomNames.length), 1);
-	}
-	// These cards will all be used in the game. Save copies of them to the game state.
-	G._cardsInPlay = [charNames.slice(), itemNames.slice(), roomNames.slice()];
 	// Shuffle the cards
 	charNames = Shuffle(charNames);
 	roomNames = Shuffle(roomNames);
 	itemNames = Shuffle(itemNames);
+	// Remove values until there are the correct number of characters, items and rooms
+	while (charNames.length > G._charNum) {
+		charNames.shift();
+	}
+	while (itemNames.length > G._itemNum) {
+		itemNames.shift();
+	}
+	while (roomNames.length > G._roomNum) {
+		roomNames.shift();
+	}
+	// These cards will all be used in the game. Save copies of them to the game state.
+	G._cardsInPlay = [charNames.slice(), roomNames.slice(), itemNames.slice()];
 	// Get a random character, add it to answer and remove it from charNames. Repeat for room and item
 	answer.push(charNames.shift());
 	answer.push(roomNames.shift());
 	answer.push(itemNames.shift());
+	G._answer = answer;
 	// Create an empty hand in G._startingInventories for each player
 	for (let ii = 0; ii < ctx.numPlayers; ii++) {
 		G._startingInventories[ii] = [[], [], []];
@@ -200,27 +247,15 @@ function DealInventories(G, ctx) { // Deals the inventories of each player, and 
 	let playerIndex = Math.floor(Math.random() * playersNum); // Random starting index
 	while (charNames.length > 0) { // Deal cards to players
 		G._startingInventories[playerIndex][0].push(charNames.shift());
-		if (playerIndex == playersNum - 1) { // Next player is first player if at last player
-			playerIndex = 0;
-		} else {
-			playerIndex++;
-		}
+		playerIndex = (playerIndex + 1) % playersNum; // Next player is first player if at last player
 	}
 	while (roomNames.length > 0) {
 		G._startingInventories[playerIndex][1].push(roomNames.shift());
-		if (playerIndex == playersNum - 1) { // Next player is first player if at last player
-			playerIndex = 0;
-		} else {
-			playerIndex++;
-		}
+		playerIndex = (playerIndex + 1) % playersNum;
 	}
 	while (itemNames.length > 0) {
 		G._startingInventories[playerIndex][2].push(itemNames.shift());
-		if (playerIndex == playersNum - 1) { // Next player is first player if at last player
-			playerIndex = 0;
-		} else {
-			playerIndex++;
-		}
+		playerIndex = (playerIndex + 1) % playersNum; // I love how clean this line is. I had an 'if' last time
 	}
 	// Cards have been dealt
 }
@@ -242,24 +277,31 @@ function Shuffle(array) { // Shuffles an array, used for dealing cards
 	return array;
 }
 
-function BeginTurn(G) { // Runs at the start of each turn
+function BeginTurn(G, ctx) { // Runs at the start of each turn
 	G.diceRoll = [0, null, null, false]; // Reset dice roll
+	if (G.losers[ctx.currentPlayer]) { // If this player is "out",
+		ctx.events.endTurn(); // End the turn
+	}
 }
 
-function QuerryPlayerInv(G, ctx, player, character, room, item) { // Returns 1,2 or 3 along with the value if the player has one of the querried values, and 0 along with null if they don't
-	let playerInv = G.playerInventories[player];
-	let playerInvCharacter = playerInv[0];
-	if (playerInvCharacter == character) {
-		return [1, playerInvCharacter];
+function QuerryPlayerInv(G, player, character, room, item) { // Returns 1,2 or 3 along with the value if the player has one of the querried values, and 0 along with null if they don't
+	let playerInv = G._startingInventories[player]; // Get this players inventory
+	let playerInvCharacter = playerInv[0]; // Get this players characters
+	if (playerInvCharacter.includes(character)) { // Is it correct?
+		console.log('player: ' + player + ', playerInvCharacter: ' + character);
+		return [1, playerInvCharacter]; // Return
 	}
-	let playerInvRoom = playerInv[1];
-	if (playerInvRoom == room) {
+	let playerInvRoom = playerInv[1]; // Otherwise check rooms etc
+	if (playerInvRoom.includes(room)) {
+		console.log('player: ' + player + ', playerInvRoom: ' + room);
 		return [2, playerInvRoom];
 	}
 	let playerInvItem = playerInv[2];
-	if (playerInvItem == item) {
+	if (playerInvItem.includes(item)) {
+		console.log('player: ' + player + ', playerInvItem: ' + item);
 		return [3, playerInvItem];
 	}
+	console.log('player: ' + player + ' had nothing');
 	return [0, null]; // Item not found on player
 }
 
@@ -300,27 +342,6 @@ function GenerateEverything(G, ctx) {
 		console.log(row);
 	}
 
-	// Place all players in empty spots on the map and save their positions as [x,y] (Plus empty room data)
-	let playerLocations = [];
-	for (let ii = 0; ii < ctx.numPlayers; ii++) {
-		let playerX = Math.floor(Math.random() * boardSize);
-		let playerY = Math.floor(Math.random() * boardSize);
-		if (playerLocations.length > 0) { // If there are already players on the map
-			for (let jj = 0; jj < playerLocations.length; jj++) { // Don't place player on top of another player
-				while (Gmap[playerX][playerY] !== 'O' && !(playerLocations[jj][0] == playerX && playerLocations[jj][1] == playerY)) { // Ensure spot is an outside tile and not on another player
-					playerX = Math.floor(Math.random() * boardSize);
-					playerY = Math.floor(Math.random() * boardSize);
-				}
-			}
-		} else { // Don't check for players
-			while (Gmap[playerX][playerY] !== 'O') { // Ensure spot is an outside tile
-				playerX = Math.floor(Math.random() * boardSize);
-				playerY = Math.floor(Math.random() * boardSize);
-			}
-		}
-		playerLocations[ii] = [playerX, playerY, false, -1]; // Save player location, with -1 room ID
-	}
-
 	// Generate a list of rooms, and save their index in the list to each room tile in GAMEMAP
 	let roomList = [];
 	let curIndex = 0; // Keeps track of room IDs
@@ -343,6 +364,33 @@ function GenerateEverything(G, ctx) {
 			row += GAMEMAP[jj][ii].roomID == null ? '.' : GAMEMAP[jj][ii].roomID;
 		}
 		console.log(row);
+	}
+
+	// Place all players in empty spots on the map and save their positions as [x,y] (Plus empty room data)
+	let playerLocations = [];
+	for (let ii = 0; ii < ctx.numPlayers; ii++) {
+		let playerX = Math.floor(Math.random() * boardSize);
+		let playerY = Math.floor(Math.random() * boardSize);
+		if (playerLocations.length > 0) { // If there are already players on the map
+			for (let jj = 0; jj < playerLocations.length; jj++) { // Don't place player on top of another player
+				while (Gmap[playerX][playerY] !== 'O' && !(playerLocations[jj][0] == playerX && playerLocations[jj][1] == playerY)) { // Ensure spot is an outside tile and not on another player
+					playerX = Math.floor(Math.random() * boardSize);
+					playerY = Math.floor(Math.random() * boardSize);
+				}
+			}
+		} else { // Don't check for players
+			while (Gmap[playerX][playerY] !== 'O') { // Ensure spot is an outside tile
+				playerX = Math.floor(Math.random() * boardSize);
+				playerY = Math.floor(Math.random() * boardSize);
+			}
+		}
+		playerLocations[ii] = [playerX, playerY, false, -1]; // Save player location, with -1 room ID
+	}
+
+	// Quickly prepare the losers list, all set to false
+	G.losers = [];
+	for (let ii = 0; ii < ctx.numPlayers; ii++) {
+		G.losers[ii] = false;
 	}
 
 	G.playerLocations = playerLocations;
