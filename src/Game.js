@@ -5,20 +5,39 @@ import { INVALID_MOVE } from 'boardgame.io/core'; // Handles invalid moves
 var GAMEMAP = null; // Hopefully a global variable
 var MAPSIZE = 6; // The size of the map (NxN)
 var ROOMNUM = 6; // Number of rooms to generate. Note this is FULL rooms, not room tiles
+var ITEMNUM = 6; // Number of items to generate
+var CHARNUM = 6; // Number of characters to generate
 
 var SAFETILES = ['O', 'DN', 'DS', 'DW', 'DE']; // Stores the tiles a player can stand on
+
+// The following names are all placeholders. Don't take them too seriously
+var CHARACTERS = [ // Stores the possible character names for the game
+	"John", "Jhon", "Jack", "James", "Jeremy", "Jerald", "Jerome", "Jeorge", "Jessica", "Jone", "Jeremiah", "Jannet", "Josh", "Joseph", "Julian", "Jayden", "Jon", "Joey", "Jax", "Micheal the Destroyer of Worlds", "Jake"
+];
+var ROOMS = [ // Stores the possible room names for the game
+	"Kitchen", "Kitchenette", "Kitchen-Diner", "Gallery", "Cookhouse", "Bakehouse", "Scullery", "Cookery", "Canteen", "Bakery", "Pantry", "Caboose", "Eat-in", "Mess", "Cooking Area"
+];
+var ITEMS = [ // Stores the possible item names for the game
+	"Stick", "Stone", "Big Stick", "Two Stones", "Two Birds", "One Big Bird", "One Big Stone", "Two Big Sticks", "A Stick and Two Stones", "The Neighbours Outdoor Table", "The Neighbours Front Door", "My Front Door", "My Front Door and Two Big Sticks", "A Rock shaped like a Kiwi", "A Kiwi", "An Evil Kiwi"
+];
 
 export const TestGame = {
 	setup: () => ({ // Anything starting with an underscore will NOT change
 		_mapGenerated: false, // True once a map is generated
 		_mapSize: MAPSIZE,
 		_boardSize: MAPSIZE * 3, // 3x3 cells and all
-		_roomNum: ROOMNUM,
+		_roomNum: ROOMNUM, // Number of rooms to generate
+		_itemNum: ITEMNUM, // The number of items in the game
+		_charNum: CHARNUM, // The number of characters in the game (NOT PLAYERS)
 		_safeTiles: SAFETILES, // So that frontend can access the same safe tiles that are assumed in backend
 		_roomList: null, // List of rooms, form is [roomID, tileID, [tileList], [doorList]], where any coordinate in tile/door list is relative to G.cells
 		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
 		playerLocations: [], // Stores the location of players as [x,y,inRoom,roomID] (These are drawn over the normal tiles) (These values are always "last seen," read inRoom to see which is up to date; roomID or (x,y))
 		diceRoll: [0, null, null, false], // Stores the dice roll for the current turn. In format of [total, d1, d2, hasRolled]
+		_startingInventories: [], // Stores the starting inventories of players, in format of [[[characters],[rooms],[items]], [...], etc] (Each index is a player)
+		_answer: null, // Stores the final solution of the game. Same format: [[characters], [rooms], [items]]
+		_cardsInPlay: [], // Stores a list of every card currently in this game. Same format: [[characters], [rooms], [items]] (THIS INCLUDES ROOM NAMES, the length should be equal to _roomNum, and can be treated as in order)
+		_winner: null, // Stores the winner of the game. Uses player index/id
 	}),
 	turn: {
 		onBegin: (G, ctx) => (BeginTurn(G)), // Runs before each turn. Currently resets dice roll
@@ -117,30 +136,131 @@ export const TestGame = {
 			start: true,
 		},
 	},
-	endIf: (G, ctx) => {
-		// OLD CODE
-		// let winner = IsVictory(G.playerLocations, ctx.currentPlayer);
-		// if (winner !== null) {
-		// 	return { winner };
-		// }
+	endIf: (G, ctx) => { // End the game if a player has won
+		let winner = G._winner;
+		if (winner !== null) {
+			return { winner };
+		}
 	},
 };
 
+function DealInventories(G, ctx) { // Deals the inventories of each player, and sets the game answer
+	let charNames = CHARACTERS.slice(); // Copy the character names
+	let roomNames = ROOMS.slice();
+	let itemNames = ITEMS.slice();
+	let answer = [];
+	// Ensure there are enough characters, items and room names for the game
+	while (charNames.length < G._charNum) {
+		charNamesCopy = charNames.slice();
+		for (let ii = 0; ii < charNamesCopy.length; ii++) { // Append to each new name so that each name is unique
+			charNamesCopy[ii] += ' (copy)';
+		}
+		charNames = charNames.concat(charNames); // Length is now doubled
+	}
+	while (itemNames.length < G._itemNum) {
+		itemNamesCopy = itemNames.slice();
+		for (let ii = 0; ii < itemNamesCopy.length; ii++) { // Append to each new name so that each name is unique
+			itemNamesCopy[ii] += ' (copy)';
+		}
+		itemNames = itemNames.concat(itemNames); // Length is now doubled
+	}
+	while (roomNames.length < G._roomNum) {
+		roomNamesCopy = roomNames.slice();
+		for (let ii = 0; ii < roomNamesCopy.length; ii++) { // Append to each new name so that each name is unique
+			roomNamesCopy[ii] += ' (copy)';
+		}
+		roomNames = roomNames.concat(roomNames); // Length is now doubled
+	}
+	// Remove values randomly until there are the correct number of characters, items and rooms
+	while (charNames.length > G._charNum) {
+		charNames.splice(Math.floor(Math.random() * charNames.length), 1);
+	}
+	while (itemNames.length > G._itemNum) {
+		itemNames.splice(Math.floor(Math.random() * itemNames.length), 1);
+	}
+	while (roomNames.length > G._roomNum) {
+		roomNames.splice(Math.floor(Math.random() * roomNames.length), 1);
+	}
+	// These cards will all be used in the game. Save copies of them to the game state.
+	G._cardsInPlay = [charNames.slice(), itemNames.slice(), roomNames.slice()];
+	// Shuffle the cards
+	charNames = Shuffle(charNames);
+	roomNames = Shuffle(roomNames);
+	itemNames = Shuffle(itemNames);
+	// Get a random character, add it to answer and remove it from charNames. Repeat for room and item
+	answer.push(charNames.shift());
+	answer.push(roomNames.shift());
+	answer.push(itemNames.shift());
+	// Create an empty hand in G._startingInventories for each player
+	for (let ii = 0; ii < ctx.numPlayers; ii++) {
+		G._startingInventories[ii] = [[], [], []];
+	}
+	// Deal inventories from remaining characters, rooms, and items
+	let playersNum = ctx.numPlayers;
+	let playerIndex = Math.floor(Math.random() * playersNum); // Random starting index
+	while (charNames.length > 0) { // Deal cards to players
+		G._startingInventories[playerIndex][0].push(charNames.shift());
+		if (playerIndex == playersNum - 1) { // Next player is first player if at last player
+			playerIndex = 0;
+		} else {
+			playerIndex++;
+		}
+	}
+	while (roomNames.length > 0) {
+		G._startingInventories[playerIndex][1].push(roomNames.shift());
+		if (playerIndex == playersNum - 1) { // Next player is first player if at last player
+			playerIndex = 0;
+		} else {
+			playerIndex++;
+		}
+	}
+	while (itemNames.length > 0) {
+		G._startingInventories[playerIndex][2].push(itemNames.shift());
+		if (playerIndex == playersNum - 1) { // Next player is first player if at last player
+			playerIndex = 0;
+		} else {
+			playerIndex++;
+		}
+	}
+	// Cards have been dealt
+}
 
-
-// function IsVictory(playerLocations, currentPlayer) {
-// 	// A player wins if it moves next to another player
-// 	const playerDistance = Math.abs(playerLocations[0] - playerLocations[1]);
-// 	if (playerDistance == 1 || playerDistance == 5) {
-// 		return currentPlayer;
-// 	}
-// 	else {
-// 		return null;
-// 	}
-// };
+function Shuffle(array) { // Shuffles an array, used for dealing cards
+	let currentIndex = array.length;
+	let temporaryValue;
+	let randomIndex;
+	// While there remain elements to shuffle,
+	while (0 !== currentIndex) {
+		// Pick a remaining element,
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex -= 1;
+		// And swap it with the current element. (You can do this using xor and not use a temporary variable. It isn't happening here, but it's still cool)
+		temporaryValue = array[currentIndex];
+		array[currentIndex] = array[randomIndex];
+		array[randomIndex] = temporaryValue;
+	}
+	return array;
+}
 
 function BeginTurn(G) { // Runs at the start of each turn
 	G.diceRoll = [0, null, null, false]; // Reset dice roll
+}
+
+function QuerryPlayerInv(G, ctx, player, character, room, item) { // Returns 1,2 or 3 along with the value if the player has one of the querried values, and 0 along with null if they don't
+	let playerInv = G.playerInventories[player];
+	let playerInvCharacter = playerInv[0];
+	if (playerInvCharacter == character) {
+		return [1, playerInvCharacter];
+	}
+	let playerInvRoom = playerInv[1];
+	if (playerInvRoom == room) {
+		return [2, playerInvRoom];
+	}
+	let playerInvItem = playerInv[2];
+	if (playerInvItem == item) {
+		return [3, playerInvItem];
+	}
+	return [0, null]; // Item not found on player
 }
 
 function GenerateEverything(G, ctx) {
@@ -228,7 +348,10 @@ function GenerateEverything(G, ctx) {
 	G.playerLocations = playerLocations;
 	G._roomList = roomList; // For use when looking for room data (Groups of room tiles)
 	G.cells = Gmap;
-	G._mapGenerated = true; // Let's see if this works
+	G._mapGenerated = true;
+
+	// Generate items for the game
+	DealInventories(G, ctx);
 }
 
 
