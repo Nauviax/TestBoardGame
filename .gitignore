@@ -6,3 +6,4 @@ dist/
 dist/App.f684dadd.js
 dist/index.js
 dist/index.js.map
+package-lock.json
