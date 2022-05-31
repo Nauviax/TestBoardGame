@@ -1,9 +1,14 @@
 const { Server, Origins } = require('boardgame.io/server');
-const { TestGame } = require('./Game');
+const { KiwiKluedo } = require('./Game');
 
 const server = Server({
-  games: [TestGame],
+  games: [KiwiKluedo],
   origins: [Origins.LOCALHOST],
 });
 
-server.run(8080);
+const lobbyConfig = {
+  apiPort: 8088,
+  apiCallback: () => console.log('Running Lobby API on port 8088...'),
+};
+
+server.run({ port: 8080, lobbyConfig });

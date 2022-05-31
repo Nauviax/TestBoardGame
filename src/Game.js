@@ -21,7 +21,7 @@ var ITEMS = [ // Stores the possible item names for the game
 	"Stick", "Stone", "Big Stick", "Two Stones", "Two Birds", "One Big Bird", "One Big Stone", "Two Big Sticks", "A Stick and Two Stones", "The Neighbours Outdoor Table", "The Neighbours Front Door", "My Front Door", "My Front Door and Two Big Sticks", "A Rock shaped like a Kiwi", "A Kiwi", "An Evil Kiwi"
 ];
 
-export const TestGame = {
+export const KiwiKluedo = {
 	setup: () => ({ // Anything starting with an underscore will NOT change
 		_mapGenerated: false, // True once a map is generated
 		_mapSize: MAPSIZE,
@@ -41,6 +41,7 @@ export const TestGame = {
 		losers: [], // Stores the losers of the game. List of true/false values, false if the player is still playing, true if they accused wrongly and are out.
 		querryOutput: [null, null, null], // Stores the output of the querry move, in format of [player, type(1,2,3), value] where type 1 reffers to character, type 2 reffers to room, and type 3 reffers to item
 	}),
+	name: 'KiwiKluedo',
 	turn: {
 		onBegin: (G, ctx) => (BeginTurn(G, ctx)), // Runs before each turn. Currently resets dice roll
 		endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out\
