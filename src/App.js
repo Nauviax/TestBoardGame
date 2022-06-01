@@ -104,14 +104,46 @@ class TestGameClient {
 				const cellValue = state.G.cells[cellCoords[0]][cellCoords[1]]; // 2D array yay
 				cell.textContent = cellValue; // Update cell text
 
-				if (cellValue == "O" || cellValue == "I") { // If cell is an empty tile, actually draw a blank char
-					cell.textContent = ""; // This is temporary !!!
+				if (cellValue == "WN" || cellValue == "WS") { // If cell is an empty tile, actually draw a blank char
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/wall.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+				}
+				else if (cellValue == "WE" || cellValue == "WW") { // If cell is an empty tile, actually draw a blank char
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/wall.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+				}
+				else if (cellValue == "DN") { // If cell is an empty tile, actually draw a blank char
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/doorS.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+				}
+				else if (cellValue == "DS") { // If cell is an empty tile, actually draw a blank char
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/doorN.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+				}
+				else if (cellValue == "DE") { // If cell is an empty tile, actually draw a blank char
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/doorW.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+				}
+				else if (cellValue == "DW") { // If cell is an empty tile, actually draw a blank char
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/doorE.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+				}
+				else if (cellValue == "CNE" || cellValue == "CNW") { // If cell is an empty tile, actually draw a blank char
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/wall.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+				}
+				else if (cellValue == "CSE" || cellValue == "CSW") { // If cell is an empty tile, actually draw a blank char
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/wall.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
 				}
 
 				let containsPlayer = false; // True if cell contains a player (Used to draw valid move markers) (This is temporary, feel free to change this)
 				for (let ii = 0; ii < state.G.playerLocations.length; ii++) { // Check if this cell contains a player. Append the player num if so
 					if (cellCoords[0] == state.G.playerLocations[ii][0] && cellCoords[1] == state.G.playerLocations[ii][1]) {
 						cell.textContent += ii; // Player ID/char is just it's num/index
+						containsPlayer = true;
+					}
+					
+					if (cellCoords[0] == state.G.playerLocations[0][0] && cellCoords[1] == state.G.playerLocations[0][1]) {
+						cell.textContent += ii; // Player ID/char is just it's num/index
+						cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/blueplayer.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+						containsPlayer = true;
+					}
+					else if (cellCoords[0] == state.G.playerLocations[1][0] && cellCoords[1] == state.G.playerLocations[1][1]) {
+						cell.textContent += ii; // Player ID/char is just it's num/index
+						cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/redplayer.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
 						containsPlayer = true;
 					}
 				}
@@ -123,7 +155,7 @@ class TestGameClient {
 					const deltaY = Math.abs(cellCoords[1] - state.G.playerLocations[state.ctx.currentPlayer][1]);
 
 					if (!containsPlayer && deltaX + deltaY != 0 && deltaX + deltaY <= state.G.diceRoll[0]) { // If within correct distance, draw a move indicator
-						cell.textContent += "V";
+						cell.textContent += "o";
 					}
 				}
 			}
