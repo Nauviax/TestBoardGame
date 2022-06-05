@@ -7,25 +7,25 @@ var InitialMapGenerated = false;
 function SplashScreen(rootElement) {
 	console.log("Displaying splash screen");
 	return new Promise((resolve) => {
-	  const createButton = (playerID) => {
-		const button = document.createElement('button');
-		button.textContent = 'Player ' + playerID;
-		button.onclick = () => resolve(playerID);
-		rootElement.append(button);
-	  };
-	  rootElement.innerHTML = ` <p>Play as</p>`;
-	  const playerIDs = ['0', '1'];
-	  playerIDs.forEach(createButton);
+		const createButton = (playerID) => {
+			const button = document.createElement('button');
+			button.textContent = 'Player ' + playerID;
+			button.onclick = () => resolve(playerID);
+			rootElement.append(button);
+		};
+		rootElement.innerHTML = ` <p>Play as</p>`;
+		const playerIDs = ['0', '1'];
+		playerIDs.forEach(createButton);
 	});
 }
 
 // To launch this app, type 'npm start' into a console
 class TestGameClient {
 	constructor(rootElement, { playerID } = {}) {
-		this.client = Client({ 
+		this.client = Client({
 			game: TestGame,
 			multiplayer: SocketIO({ server: 'localhost:8080' }),
-			playerID, 
+			playerID,
 		});
 		this.connected = false;
 		this.client.start();
@@ -38,11 +38,11 @@ class TestGameClient {
 		this.connected = false;
 		this.showConnecting();
 	}
-	
+
 	onConnected() {
 		this.connected = true;
 	}
-	
+
 	showConnecting() {
 		this.rootElement.innerHTML = '<p>connecting…</p>';
 	}
@@ -68,8 +68,16 @@ class TestGameClient {
 	attachListeners() {
 		// This event handler will read the cell id from a cell’s `data-id` attribute and make the `clickCell` move.
 		const handleCellClick = event => {
-			const id = parseInt(event.target.dataset.id);
-			this.client.moves.clickCell(id);
+			let id = parseInt(event.target.dataset.id);
+			if (Number.isInteger(id)) {
+				console.log("Clicked cell " + id);
+				this.client.moves.clickCell(id);
+			}
+			else {
+				id = parseInt(event.target.parentElement.dataset.id);
+				console.log("Clicked picture cell " + id);
+				this.client.moves.clickCell(id);
+			}
 		};
 		// Attach the event listener to each of the board cells.
 		const cells = this.rootElement.querySelectorAll('.cell');
@@ -102,61 +110,60 @@ class TestGameClient {
 				const cellID = parseInt(cell.dataset.id);
 				const cellCoords = [cellID % mapSize, Math.floor(cellID / mapSize)];
 				const cellValue = state.G.cells[cellCoords[0]][cellCoords[1]]; // 2D array yay
-				cell.textContent = cellValue; // Update cell text
 
 				if (cellValue == "O") { // If cell is an empty tile, actually draw a blank char
 					cell.textContent = "";
 				}
-				else if (cellValue == "I"){
+				else if (cellValue == "I") {
 					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/I.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "WN") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/WN.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/WN.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "WE") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/WE.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/WE.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "DN") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DN.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DN.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "DS") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DS.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DS.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "DE") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DE.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DE.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "DW") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DW.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DW.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "CNE") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CNE.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CNE.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "CSE") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CSE.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CSE.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "WS") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/WS.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/WS.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "WW") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/WW.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/WW.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "CNW") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CNW.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CNW.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "CSW") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CSW.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CSW.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "CINW") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CINW.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CINW.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "CISW") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CISW.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CISW.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "CINE") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CINE.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CINE.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 				else if (cellValue == "CISE") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CISE.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/CISE.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 				}
 
 				let containsPlayer = false; // True if cell contains a player (Used to draw valid move markers) (This is temporary, feel free to change this)
@@ -165,15 +172,15 @@ class TestGameClient {
 						cell.textContent += ii; // Player ID/char is just it's num/index
 						containsPlayer = true;
 					}
-					
+
 					if (cellCoords[0] == state.G.playerLocations[0][0] && cellCoords[1] == state.G.playerLocations[0][1]) {
 						cell.textContent += ii; // Player ID/char is just it's num/index
-						cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/blueplayer.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+						cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/blueplayer.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 						containsPlayer = true;
 					}
 					else if (cellCoords[0] == state.G.playerLocations[1][0] && cellCoords[1] == state.G.playerLocations[1][1]) {
 						cell.textContent += ii; // Player ID/char is just it's num/index
-						cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/redplayer.png' style='width: 50px; height: 50px; object-fit; fill;'/>"; 
+						cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/redplayer.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 						containsPlayer = true;
 					}
 				}
@@ -197,7 +204,7 @@ class TestGameClient {
 						else if (cellValue == "DW") { // If cell is an empty tile, actually draw a blank char
 							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DWV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 						}
-						else{
+						else {
 							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/OV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
 						}
 					}
@@ -219,9 +226,9 @@ class TestGameClient {
 
 class App {
 	constructor(rootElement) {
-	  this.client = SplashScreen(rootElement).then((playerID) => {
-		return new TestGameClient(rootElement, { playerID });
-	  });
+		this.client = SplashScreen(rootElement).then((playerID) => {
+			return new TestGameClient(rootElement, { playerID });
+		});
 	}
 }
 
