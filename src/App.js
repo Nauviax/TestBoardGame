@@ -105,7 +105,7 @@ class TestGameClient {
 				cell.textContent = cellValue; // Update cell text
 
 				if (cellValue == "O") { // If cell is an empty tile, actually draw a blank char
-					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/O.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
+					cell.textContent = "";
 				}
 				else if (cellValue == "I"){
 					cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/I.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
@@ -185,7 +185,21 @@ class TestGameClient {
 					const deltaY = Math.abs(cellCoords[1] - state.G.playerLocations[state.ctx.currentPlayer][1]);
 
 					if (!containsPlayer && deltaX + deltaY != 0 && deltaX + deltaY <= state.G.diceRoll[0]) { // If within correct distance, draw a move indicator
-						cell.textContent += "o";
+						if (cellValue == "DN") { // If cell is an empty tile, actually draw a blank char
+							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DNV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
+						}
+						else if (cellValue == "DS") { // If cell is an empty tile, actually draw a blank char
+							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DSV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
+						}
+						else if (cellValue == "DE") { // If cell is an empty tile, actually draw a blank char
+							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DEV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
+						}
+						else if (cellValue == "DW") { // If cell is an empty tile, actually draw a blank char
+							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DWV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
+						}
+						else{
+							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/OV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
+						}
 					}
 				}
 			}
