@@ -31,6 +31,7 @@ export const KiwiKluedo = {
 		_itemNum: ITEMNUM, // The number of items in the game
 		_safeTiles: SAFETILES, // So that frontend can access the same safe tiles that are assumed in backend
 		_roomList: null, // List of rooms, form is [roomID, tileID, [tileList], [doorList]], where any coordinate in tile/door list is relative to G.cells
+		_roomMap: null, // Simple minimap representation of the rooms
 		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
 		playerLocations: [], // Stores the location of players as [x,y,inRoom,roomID] (These are drawn over the normal tiles) (These values are always "last seen," read inRoom to see which is up to date; roomID or (x,y))
 		diceRoll: [0, null, null, false], // Stores the dice roll for the current turn. In format of [total, d1, d2, hasRolled]
@@ -334,15 +335,6 @@ function GenerateEverything(G, ctx) {
 		}
 	}
 
-	// Print id map to console for debugging
-	for (let ii = 0; ii < mapSize; ii++) {
-		var row = '';
-		for (let jj = 0; jj < mapSize; jj++) {
-			row += GAMEMAP[jj][ii].tile.id;
-		}
-		console.log(row);
-	}
-
 	// Generate a list of rooms, and save their index in the list to each room tile in GAMEMAP
 	let roomList = [];
 	let curIndex = 0; // Keeps track of room IDs
@@ -358,14 +350,16 @@ function GenerateEverything(G, ctx) {
 		}
 	}
 
-	// More debugging
+	// Save a minimap representation
+	let minimapString = "";
 	for (let ii = 0; ii < mapSize; ii++) {
 		var row = '';
 		for (let jj = 0; jj < mapSize; jj++) {
 			row += GAMEMAP[jj][ii].roomID == null ? '.' : GAMEMAP[jj][ii].roomID;
 		}
-		console.log(row);
+		minimapString += row + '<br>';
 	}
+	G._roomMap = minimapString;
 
 	// Place all players in empty spots on the map and save their positions as [x,y] (Plus empty room data)
 	let playerLocations = [];
