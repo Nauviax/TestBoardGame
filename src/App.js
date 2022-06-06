@@ -31,7 +31,7 @@ function SplashScreen(rootElement) {
 			button.onclick = () => {
 				const matchID = document.getElementById('MatchID').value;
 				const returnValue = [playerID, matchID];
-				resolve(returnValue);
+				resolve(returnValue)
 			};
 			rootElement.append(button);
 	  	};
@@ -86,6 +86,7 @@ class TestGameClient {
 			multiplayer: SocketIO({ server: 'localhost:8080' }),
 			matchID: matchID,
 			playerID, 
+			
 		});
 		this.connected = false;
 		this.client.start();
@@ -121,6 +122,8 @@ class TestGameClient {
 			}
 			rows.push(`<tr>${cells.join('')}</tr>`);
 		}
+		
+		
 
 		// Add the HTML to our app <div>.
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
@@ -128,6 +131,8 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<p>MatchID: ${this.client.matchID}</p>`;
 		this.rootElement.innerHTML += `<table>${rows.join('')}</table>`;
 		this.rootElement.innerHTML +=`<p class="winner"></p>`;
+		this.rootElement.innerHTML += `<p class="checkbox"></p>`;
+		
 	}
 
 	attachListeners() {
@@ -160,6 +165,7 @@ class TestGameClient {
 			this.createBoard(state);
 			this.attachListeners();
 			InitialMapGenerated = true;
+			this.createCheckBox();
 		}
 
 		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
@@ -197,6 +203,7 @@ class TestGameClient {
 			);
 		}
 
+
 		// Get the gameover message element.
 		const messageEl = this.rootElement.querySelector('.winner');
 		// Update the element to show a winner if any.
@@ -205,6 +212,50 @@ class TestGameClient {
 		} else {
 			messageEl.textContent = '';
 		}
+
+		//display a list of checkboxes for the playes to keep track of cards and guesses
+		//this.rootElement.querySelector('.checkbox').innerHTML = '<tt>' + state.G._roomMap + '</tt><br>';
+		
+		// promise - returns something later, resolve - activates the return
+		return new Promise((resolve) => {
+
+			for (let ii = 0; ii < state.G._roomList.length; ii++) {//for each room in the room list
+				const room = state.G._roomList[ii]; // Get the room
+				
+				checked = false; //a bool varable for the state of the checkbox
+				//a method to create a checkbox for each room in the roomlist of the current game 
+				const createCheckBox = (room) => {
+				const checkbox = document.createElement('checkbox'); //create a checkbox element
+				checkbox.id = "Room" + room;
+				checkbox.textContent = 'Room' + room;
+				checkbox.innerHTML = "<input class='checkbox' type='checkbox'>";
+				checkbox.onclick = () => { //a click event for the check box
+					if (checked == false)
+					{
+						checked = true
+					}
+					else if (checked == true)
+					{
+						checked = false
+					}
+					const returnValue = [checked];
+					resolve(returnValue)
+					};
+				rootElement.append(checkbox); 
+			  	};
+
+				  state.G._roomList.forEach(createCheckBox);	
+			}
+
+			//the style of the checkboxs
+			document.getElementById("Checkbox").style.padding = "15px 15px";
+			document.getElementById("Checkbox").style.margin = "5px";
+			document.getElementById("Checkbox").style.backgroundColor = "none";
+			document.getElementById("Checkbox").style.cursor = "pointer";
+			document.getElementById("Checkbox").style.border = "black";
+			document.getElementById("Checkbox").style.fontSize = "10px";
+
+		});
 	}
 	
 }
@@ -223,3 +274,5 @@ class App {
 console.log("Creating App");
 const appElement = document.getElementById('app');
 new App(appElement);
+
+
