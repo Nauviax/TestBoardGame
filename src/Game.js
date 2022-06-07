@@ -3,11 +3,6 @@
 import { INVALID_MOVE } from 'boardgame.io/core'; // Handles invalid moves
 
 var GAMEMAP = null; // Hopefully a global variable
-var MAPSIZE = 6; // The size of the map (NxN)
-var ROOMNUM = 6; // Number of rooms to generate. Note this is FULL rooms, not room tiles
-var ITEMNUM = 6; // Number of items to generate
-var CHARNUM = 6; // Number of characters to generate
-
 var SAFETILES = ['O', 'DN', 'DS', 'DW', 'DE']; // Stores the tiles a player can stand on
 
 // The following names are all placeholders. Don't take them too seriously
@@ -23,12 +18,13 @@ var ITEMS = [ // Stores the possible item names for the game
 
 export const KiwiKluedo = {
 	setup: () => ({ // Anything starting with an underscore will NOT change
+		_mapValuesSet: false, // Set to true when the initial setMapValues move is made
 		_mapGenerated: false, // True once a map is generated
-		_mapSize: MAPSIZE,
-		_boardSize: MAPSIZE * 3, // 3x3 cells and all
-		_charNum: CHARNUM, // The number of characters in the game (NOT PLAYERS)
-		_roomNum: ROOMNUM, // Number of rooms to generate
-		_itemNum: ITEMNUM, // The number of items in the game
+		_mapSize: 6, // Size of the board in 3x3 cells (This is a default value, the game will change this)
+		_boardSize: 18, // 3x3 cells and all. (This is a default value, the game will change this)
+		_charNum: 6, // The number of characters in the game (NOT PLAYERS) (This is a default value, the game will change this)
+		_roomNum: 6, // Number of rooms to generate (This is a default value, the game will change this)
+		_itemNum: 6, // The number of items in the game (This is a default value, the game will change this)
 		_safeTiles: SAFETILES, // So that frontend can access the same safe tiles that are assumed in backend
 		_roomList: null, // List of rooms, form is [roomID, tileID, [tileList], [doorList]], where any coordinate in tile/door list is relative to G.cells
 		_roomMap: null, // Simple minimap representation of the rooms
@@ -44,6 +40,7 @@ export const KiwiKluedo = {
 	}),
 	name: 'KiwiKluedo',
 	turn: {
+		// order: TurnOrder.CONTINUE, // Basically, do NOT end the current players turn if the phase ends. (Phase ends after generation, so would skip player 0's first turn)
 		onBegin: (G, ctx) => (BeginTurn(G, ctx)), // Runs before each turn. Currently resets dice roll
 		endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out\
 	},
@@ -175,20 +172,43 @@ export const KiwiKluedo = {
 		}
 	},
 	phases: {
-		Main: {
-			// Called at the beginning of a phase.
-			onBegin: (G, ctx) => { GenerateEverything(G, ctx) },
-
+		Generation: {
 			// Make this phase the first phase of the game.
 			start: true,
+			// Go here next
+			next: 'Main',
+			// Map settings move
+			moves: {
+				GenerateMapWithValues: {
+					move: (G, ctx, MapSize, RoomNum, ItemNum, CharNum) => {
+						G._mapSize = MapSize;
+						G._boardSize = MapSize * 3;
+						G._roomNum = RoomNum;
+						G._itemNum = ItemNum;
+						G._charNum = CharNum;
+						G._mapValuesSet = true; // Begin game
+					},
+				}
+			},
+			endIf: (G, ctx) => {
+				if (G._mapValuesSet) {
+					return true; // You can't just return G._mapValuesSet, because even returning false will end.
+				}
+			}
 		},
-	},
-	endIf: (G, ctx) => { // End the game if a player has won !!! THIS ISN'T TRIGGERING YET !!!
-		let winner = G._winner;
-		if (winner != null && winner != undefined) {
-			console.log("Game Over! Winner is player " + winner);
-			return { winner };
-		}
+		Main: {
+			// Called at the beginning of a phase.
+			onBegin: (G, ctx) => {
+				GenerateEverything(G, ctx);
+			},
+			endIf: (G, ctx) => { // End the game if a player has won
+				let winner = G._winner;
+				if (winner != null && winner != undefined) {
+					console.log("Game Over! Winner is player " + winner);
+					return { winner };
+				}
+			},
+		},
 	},
 };
 
