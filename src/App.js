@@ -183,8 +183,8 @@ class TestGameClient {
 			this.createBoard(state);
 			this.attachListeners();
 			InitialMapGenerated = true;
+			return;
 		}
-
 		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
 			// Get board size
 			const mapSize = state.G._mapSize * 3; // Each tile is 3x3
@@ -246,37 +246,37 @@ class TestGameClient {
 				}
 			}
 			);
-		}
 
-		// Display minimap
-		this.rootElement.querySelector('.minimap').innerHTML = '<tt>' + state.G._roomMap + '</tt><br>';
-		for (let ii = 0; ii < state.G._roomList.length; ii++) { // For each room,
-			const room = state.G._roomList[ii]; // Get the room
-			this.rootElement.querySelector('.minimap').innerHTML += 'Room ID ' + room[0] + ': '; // Display the room ID
-			this.rootElement.querySelector('.minimap').innerHTML += state.G._cardsInPlay[1][room[0]] + ' contains '; // Display the number of cards in play
-			let playersInRoom = 0; // Count the number of players in the room
-			for (let jj = 0; jj < state.G.playerLocations.length; jj++) { // For each player,
-				if (state.G.playerLocations[jj][2] == false) { // If the player is not in the room,
-					continue; // Skip to the next player
+			// Display minimap
+			this.rootElement.querySelector('.minimap').innerHTML = '<tt>' + state.G._roomMap + '</tt><br>';
+			for (let ii = 0; ii < state.G._roomList.length; ii++) { // For each room,
+				const room = state.G._roomList[ii]; // Get the room
+				this.rootElement.querySelector('.minimap').innerHTML += 'Room ID ' + room[0] + ': '; // Display the room ID
+				this.rootElement.querySelector('.minimap').innerHTML += state.G._cardsInPlay[1][room[0]] + ' contains '; // Display the number of cards in play
+				let playersInRoom = 0; // Count the number of players in the room
+				for (let jj = 0; jj < state.G.playerLocations.length; jj++) { // For each player,
+					if (state.G.playerLocations[jj][2] == false) { // If the player is not in the room,
+						continue; // Skip to the next player
+					}
+					if (state.G.playerLocations[jj][3] == room[0]) { // If the player is in this room,
+						playersInRoom++; // Increment the player count
+						this.rootElement.querySelector('.minimap').innerHTML += 'Player ' + jj + ', '; // Display the player num
+					}
 				}
-				if (state.G.playerLocations[jj][3] == room[0]) { // If the player is in this room,
-					playersInRoom++; // Increment the player count
-					this.rootElement.querySelector('.minimap').innerHTML += 'Player ' + jj + ', '; // Display the player num
+				if (playersInRoom == 0) { // If there are no players in the room,
+					this.rootElement.querySelector('.minimap').innerHTML += 'no players'; // Display "no players"
 				}
+				this.rootElement.querySelector('.minimap').innerHTML += '<br>';
 			}
-			if (playersInRoom == 0) { // If there are no players in the room,
-				this.rootElement.querySelector('.minimap').innerHTML += 'no players'; // Display "no players"
-			}
-			this.rootElement.querySelector('.minimap').innerHTML += '<br>';
-		}
 
-		// Get the gameover message element. (I THINK THIS IS BROKEN NOW. Untested however)
-		const messageEl = this.rootElement.querySelector('.winner');
-		// Update the element to show a winner if any.
-		if (state.ctx.gameover) {
-			messageEl.textContent = 'Winner: ' + state.ctx.gameover.winner;
-		} else {
-			messageEl.textContent = '';
+			// Get the gameover message element. (I THINK THIS IS BROKEN NOW. Untested however)
+			const messageEl = this.rootElement.querySelector('.winner');
+			// Update the element to show a winner if any.
+			if (state.ctx.gameover) {
+				messageEl.textContent = 'Winner: ' + state.ctx.gameover.winner;
+			} else {
+				messageEl.textContent = '';
+			}
 		}
 	}
 
