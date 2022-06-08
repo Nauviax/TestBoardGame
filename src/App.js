@@ -123,18 +123,32 @@ class TestGameClient {
 			rows.push(`<tr>${cells.join('')}</tr>`);
 		}
 		
-		
-
 		// Add the HTML to our app <div>.
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
 		this.rootElement.innerHTML = `<h2>Player ${this.client.playerID}</h2>`;
 		this.rootElement.innerHTML += `<p>MatchID: ${this.client.matchID}</p>`;
 		this.rootElement.innerHTML += `<table>${rows.join('')}</table>`;
 		this.rootElement.innerHTML +=`<p class="winner"></p>`;
-		this.rootElement.innerHTML += `<p class="checkbox"></p>`;
 		
-	}
-
+		//create and draw checkboxs for rooms
+		for (let ii = 0; ii < state.G._roomList.length; ii++) {//for each room in the room list
+			const room = state.G._roomList[ii]; // Get the room
+			this.rootElement.innerHTML += `<input type="checkbox" id=${ii}></input>` //Draw a checkbox for each room in game
+			this.rootElement.innerHTML += `<p>Room: ${ii}</p>`; //Write the ID for each room next to the checkbox 
+				//<br> to add a new line 
+		}
+	// 	//create and draw checkboxes for each player
+	// 	for (let ii = 0; ii < state.G.playerIDs.length ; ii++) {//for each player 
+	// 		const room = state.G.playerIDs[ii]; // Get the player ID
+	// 		this.rootElement.innerHTML += `<input type="checkbox" id=${ii}></input>` //Draw a checkbox for each player in game
+	// 			//<br> to add a new line 
+	// 	}
+	// 	for (let ii = 0; ii < state.G._itemNum.length ; ii++) {//for each item in the item list
+	// 		const room = state.G._itemNum[ii]; // Get item
+	// 		this.rootElement.innerHTML += `<input type="checkbox" id=${ii}></input>` //Draw a checkbox for each item in game
+	// 			//<br> to add a new line 
+	// 	}
+	 }
 	attachListeners() {
 		console.log("Attaching listeners");
 		// Attach the evenit listener to each of the board cells.
@@ -151,8 +165,6 @@ class TestGameClient {
 			cell.onclick = handleCellClick;
 		});
 	}
-
-
 	update(state) {
 		if (state === null) {
 			this.onConnecting();
@@ -202,8 +214,6 @@ class TestGameClient {
 			}
 			);
 		}
-
-
 		// Get the gameover message element.
 		const messageEl = this.rootElement.querySelector('.winner');
 		// Update the element to show a winner if any.
@@ -214,50 +224,8 @@ class TestGameClient {
 		}
 
 		//display a list of checkboxes for the playes to keep track of cards and guesses
-		//this.rootElement.querySelector('.checkbox').innerHTML = '<tt>' + state.G._roomMap + '</tt><br>';
-		
-		// promise - returns something later, resolve - activates the return
-		return new Promise((resolve) => {
-
-			for (let ii = 0; ii < state.G._roomList.length; ii++) {//for each room in the room list
-				const room = state.G._roomList[ii]; // Get the room
-				
-				checked = false; //a bool varable for the state of the checkbox
-				//a method to create a checkbox for each room in the roomlist of the current game 
-				const createCheckBox = (room) => {
-				const checkbox = document.createElement('checkbox'); //create a checkbox element
-				checkbox.id = "Room" + room;
-				checkbox.textContent = 'Room' + room;
-				checkbox.innerHTML = "<input class='checkbox' type='checkbox'>";
-				checkbox.onclick = () => { //a click event for the check box
-					if (checked == false)
-					{
-						checked = true
-					}
-					else if (checked == true)
-					{
-						checked = false
-					}
-					const returnValue = [checked];
-					resolve(returnValue)
-					};
-				rootElement.append(checkbox); 
-			  	};
-
-				  state.G._roomList.forEach(createCheckBox);	
-			}
-
-			//the style of the checkboxs
-			document.getElementById("Checkbox").style.padding = "15px 15px";
-			document.getElementById("Checkbox").style.margin = "5px";
-			document.getElementById("Checkbox").style.backgroundColor = "none";
-			document.getElementById("Checkbox").style.cursor = "pointer";
-			document.getElementById("Checkbox").style.border = "black";
-			document.getElementById("Checkbox").style.fontSize = "10px";
-
-		});
-	}
-	
+		//this.rootElement.querySelector('.checkbox').innerHTML = '<tt>' + state.G._roomMap + '</tt><br>';	
+	}	
 }
 
 class App {
