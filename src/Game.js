@@ -39,10 +39,6 @@ export const KiwiKluedo = {
 		querryOutput: [null, null, null], // Stores the output of the querry move, in format of [player, type(1,2,3), value] where type 1 reffers to character, type 2 reffers to room, and type 3 reffers to item
 	}),
 	name: 'KiwiKluedo',
-	turn: {
-		onBegin: (G, ctx) => (BeginTurn(G, ctx)), // Runs before each turn. Currently resets dice roll
-		endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out
-	},
 	moves: {
 		rollDice: {
 			noLimit: true,
@@ -211,7 +207,9 @@ export const KiwiKluedo = {
 				order: { // Start with player 0, then proceed normally (This is here to set player 0 as first)
 					first: (G, ctx) => 0,
 					next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
-				}
+				},
+				onBegin: (G, ctx) => (BeginTurn(G, ctx)), // Runs before each turn. Currently resets dice roll
+				endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out
 			},
 		},
 	},
