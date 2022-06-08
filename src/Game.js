@@ -26,10 +26,10 @@ export const KiwiKluedo = {
 		_roomNum: 6, // Number of rooms to generate (This is a default value, the game will change this)
 		_itemNum: 6, // The number of items in the game (This is a default value, the game will change this)
 		_safeTiles: SAFETILES, // So that frontend can access the same safe tiles that are assumed in backend
-		_roomList: null, // List of rooms, form is [roomID, tileID, [tileList], [doorList]], where any coordinate in tile/door list is relative to G.cells
+		_roomList: null, // List of rooms, form is [[roomID, tileID, [tileList], [doorList], playerTile(x,y)], etc.], where any coordinate in tile/door list is relative to G.cells
 		_roomMap: null, // Simple minimap representation of the rooms
 		cells: null, // Because JSON, all cells should only store their ID in here, not the cellData object (So [["a","b"], ["c","d"]])
-		playerLocations: [], // Stores the location of players as [x,y,inRoom,roomID] (These are drawn over the normal tiles) (These values are always "last seen," read inRoom to see which is up to date; roomID or (x,y))
+		playerLocations: [], // Stores the location of players as [x, y, inRoom, roomID] (These values are always "last seen," read inRoom to see which is up to date; roomID or (x,y))
 		diceRoll: [0, null, null, false], // Stores the dice roll for the current turn. In format of [total, d1, d2, hasRolled]
 		_startingInventories: [], // Stores the starting inventories of players, in format of [[[characters],[rooms],[items]], [...], etc] (Each index is a player)
 		_answer: null, // Stores the final solution of the game. Same format: [[characters], [rooms], [items]]
@@ -362,7 +362,7 @@ function GenerateEverything(G, ctx) {
 		for (let jj = 0; jj < mapSize; jj++) {
 			if (GAMEMAP[ii][jj].tile.id != ' ') { // If this tile is not empty
 				if (GAMEMAP[ii][jj].roomID == null) { // If this room does not yet have a roomID
-					roomList[curIndex] = [curIndex, null, [], []]; // Create a new room entry. Again, form is [roomID, tileID, [tileList], [doorList]], where any coordinate is relative to G.cells
+					roomList[curIndex] = [curIndex, null, [], [], null]; // Create a new room entry. Again, form is [roomID, tileID, [tileList], [doorList], playerTile(x,y)], where any coordinate is relative to G.cells
 					roomList = SetRoom(roomList, curIndex, GAMEMAP, ii, jj); // Sets the current tile to be this room, and all similar adjacent tiles to this room
 					curIndex++; // Increment room ID
 				}
@@ -717,18 +717,21 @@ function UpdateTile(tile, map, mapSize, depth) {
 }
 
 function SetRoom(RoomList, curIndex, GAMEMAP, xx, yy) { // Sets the current room to the given RoomData ID, adds the room to RoomData, then recursively checks for ajacent rooms that are likely the same room
-	// Form is[roomID, tileID, [tileList], [doorList]], where any coordinate is relative to G.cells
+	// Form is[roomID, tileID, [tileList], [doorList], playerTile(x,y)], where any coordinate is relative to G.cells
 	RoomList[curIndex][2].push([xx * 3, yy * 3]); // Add the current tile coords to the room (Coords are top left of tile, in G.cells space)
 	if (RoomList[curIndex][1] == null) { // If the room still needs a tileID
 		RoomList[curIndex][1] = GAMEMAP[xx][yy].tile.id; // Set the tileID to the first tile in the room
 	}
 
-	// Add any doors to the rooms list of doors (Coordinates are given relative to G.cells)
+	// Add any doors to the rooms list of doors, and set a playerTile to show players on (Coordinates are given relative to G.cells)
 	for (let ii = 0; ii < 3; ii++) {
 		for (let jj = 0; jj < 3; jj++) {
 			let cell = GAMEMAP[xx][yy].tile.walls[ii][jj]; // One of the nine cells that make up this tile
 			if (cell == 'DN' || cell == 'DS' || cell == 'DW' || cell == 'DE') { // If the cell is a door
 				RoomList[curIndex][3].push([xx * 3 + ii, yy * 3 + jj]); // Save the literal door coordinates, relative to G.cells 
+			}
+			if (cell == 'I' && RoomList[curIndex][4] == null) { // If the cell is a player tile, and the player tile hasn't been set yet,
+				RoomList[curIndex][4] = [xx * 3 + ii, yy * 3 + jj]; // Set the player tile to this tile
 			}
 		}
 	}

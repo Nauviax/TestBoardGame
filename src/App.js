@@ -215,6 +215,22 @@ class TestGameClient {
 						cell.innerHTML = `<img src='https://nrmaultsaid.jalbum.net/Players4KiwiKluedo/slides/player${playerValue}.png' style='width: 50px; height: 50px; object-fit; fill;'/>`;
 					}
 				}
+				// New code for displaying players in rooms. Will only show one player per room, and prioritises players whos turn is closest.
+				let previousPlayer = (state.ctx.numPlayers + state.ctx.currentPlayer - 1) % state.ctx.numPlayers;
+				for (let ii = 0; ii < state.ctx.numPlayers; ii++) { // For each player, (Going backwards, ending at current player)
+					if (state.G.playerLocations[previousPlayer][2]) { // If player is in room
+						let playerTile = state.G._roomList[state.G.playerLocations[previousPlayer][3]][4]; // Get this rooms player tile
+						if (playerTile[0] == cellCoords[0] && playerTile[1] == cellCoords[1]) { // If this cell is the player tile
+							cell.textContent += ii; // Player ID/char is just it's num/index
+							containsPlayer = true;
+							let playerValue = previousPlayer % numberOfColours;
+							cell.innerHTML = `<img src='https://nrmaultsaid.jalbum.net/Players4KiwiKluedo/slides/player${playerValue}.png' style='width: 50px; height: 50px; object-fit; fill;'/>`;
+							// This should really be a similar png, but dark background
+						}
+					}
+					previousPlayer = (state.ctx.numPlayers + previousPlayer - 1) % state.ctx.numPlayers; // Repeat for previous player, ending at current player
+				}
+
 
 				// Draw valid moves
 				if (state.G.playerLocations[state.ctx.currentPlayer][2]) { // If player is in a room
