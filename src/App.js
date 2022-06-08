@@ -138,6 +138,57 @@ class TestGameClient {
 				grassMap[ii].push(Math.floor(Math.random() * 4));
 			}
 		}
+
+		// Load a copy of every important image to the bottom of the screen, size 0. This is dumb, but it prevents the client from forgetting about images and having to fetch them again.
+
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/O0.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/O1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/O2.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/O3.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/O0V.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/O1V.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/O2V.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/O3V.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/WN.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/WS.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/WW.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/WE.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/DN.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/DS.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/DW.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/DE.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/DNV.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/DSV.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/DWV.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/DEV.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CNW.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CNE.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CSW.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CSE.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/IP0.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/IP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/IP2.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/IP3.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/IP4.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/IP5.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/OP0.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/OP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/OP2.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/OP3.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/OP4.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/OP5.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+
+		// Players on top of doors aren't loaded in for now, as that's 24 more images.
+		// Edit: I lied, I'm adding them in for players 0 and 1
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DNP0.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DSP0.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DWP0.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DEP0.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DNP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DSP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DWP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DEP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 	}
 
 	attachListeners() {
