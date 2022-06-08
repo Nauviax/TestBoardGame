@@ -126,7 +126,7 @@ class TestGameClient {
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
 		this.rootElement.innerHTML = `<h2>Player ${this.client.playerID}</h2>`;
 		this.rootElement.innerHTML += `<p>MatchID: ${this.client.matchID}</p>`;
-		this.rootElement.innerHTML += `<table>${rows.join('')}</table>`;
+		this.rootElement.innerHTML += `<table cellspacing="0" cellpadding="0">${rows.join('')}</table>`; // THEY SAID IT COULDN'T BE DONE
 		this.rootElement.innerHTML += `<p class="minimap"></p>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 	}
