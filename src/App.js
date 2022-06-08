@@ -188,6 +188,8 @@ class TestGameClient {
 		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
 			// Get board size
 			const mapSize = state.G._mapSize * 3; // Each tile is 3x3
+			//Number of colours for players
+			const numberOfColours = 6;
 			// Get all the board cells.
 			const cells = this.rootElement.querySelectorAll('.cell');
 			// Update cells to display the values in game state.
@@ -209,12 +211,8 @@ class TestGameClient {
 					if (cellCoords[0] == state.G.playerLocations[ii][0] && cellCoords[1] == state.G.playerLocations[ii][1]) {
 						cell.textContent += ii; // Player ID/char is just it's num/index
 						containsPlayer = true;
-						if (ii == 0) { // First two players are red and blue, and get images
-							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/blueplayer.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
-						}
-						if (ii == 1) {
-							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/redplayer.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
-						}
+						let playerValue = ii % numberOfColours;
+						cell.innerHTML = `<img src='https://nrmaultsaid.jalbum.net/Players4KiwiKluedo/slides/player${playerValue}.png' style='width: 50px; height: 50px; object-fit; fill;'/>`;
 					}
 				}
 
