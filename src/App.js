@@ -155,7 +155,6 @@ class TestGameClient {
 		});
 	}
 
-
 	update(state) {
 		if (state === null) {
 			this.onConnecting();
@@ -185,6 +184,7 @@ class TestGameClient {
 			InitialMapGenerated = true;
 			return;
 		}
+
 		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
 			// Get board size
 			const mapSize = state.G._mapSize * 3; // Each tile is 3x3
@@ -196,23 +196,18 @@ class TestGameClient {
 			cells.forEach(cell => {
 				const cellID = parseInt(cell.dataset.id);
 				const cellCoords = [cellID % mapSize, Math.floor(cellID / mapSize)];
-				const cellValue = state.G.cells[cellCoords[0]][cellCoords[1]]; // 2D array yay
 
-				// Draw rooms
-				if (cellValue == "O") { // If cell is an empty tile, actually draw a blank char
-					cell.textContent = "";
-				} else {
-					cell.innerHTML = `<img src='https://nrmaultsaid.jalbum.net/images/slides/${cellValue}.png' style='width: 50px; height: 50px; object-fit; fill;'/>`;
-				}
+				let cellValue = state.G.cells[cellCoords[0]][cellCoords[1]]; // 2D array yay, contains the ID of the cell
+				let cellValid = false; // True if tile is valid move (Adds a 'V' to the link)
+				let cellHasPlayer = false; // True if player is on this tile (Used for selecting the correct gallery, the website has a max image limit)
+				let playerValue = ""; // Contains the player id IF there is a player here ('P' is added before the number)
+				let cellVariation = ""; // Contains a random positive integer, IF the cell has a variation requirement
 
 				// Draw players
-				let containsPlayer = false; // True if cell contains a player (Used to draw valid move markers) (This is temporary, feel free to change this)
 				for (let ii = 0; ii < state.G.playerLocations.length; ii++) { // Check if this cell contains a player. Append the player num if so
 					if (cellCoords[0] == state.G.playerLocations[ii][0] && cellCoords[1] == state.G.playerLocations[ii][1]) {
-						cell.textContent += ii; // Player ID/char is just it's num/index
-						containsPlayer = true;
-						let playerValue = ii % numberOfColours;
-						cell.innerHTML = `<img src='https://nrmaultsaid.jalbum.net/Players4KiwiKluedo/slides/player${playerValue}.png' style='width: 50px; height: 50px; object-fit; fill;'/>`;
+						cellHasPlayer = true;
+						playerValue = 'P' + (ii % numberOfColours); // loop back to red if we go over the number of colours
 					}
 				}
 				// New code for displaying players in rooms. Will only show one player per room, and prioritises players whos turn is closest.
@@ -221,81 +216,73 @@ class TestGameClient {
 					if (state.G.playerLocations[previousPlayer][2]) { // If player is in room
 						let playerTile = state.G._roomList[state.G.playerLocations[previousPlayer][3]][4]; // Get this rooms player tile
 						if (playerTile[0] == cellCoords[0] && playerTile[1] == cellCoords[1]) { // If this cell is the player tile
-							cell.textContent += ii; // Player ID/char is just it's num/index
-							containsPlayer = true;
-							let playerValue = previousPlayer % numberOfColours;
-							cell.innerHTML = `<img src='https://nrmaultsaid.jalbum.net/Players4KiwiKluedo/slides/player${playerValue}.png' style='width: 50px; height: 50px; object-fit; fill;'/>`;
-							// This should really be a similar png, but dark background
+							cellHasPlayer = true;
+							playerValue = 'P' + (previousPlayer % numberOfColours);
 						}
 					}
 					previousPlayer = (state.ctx.numPlayers + previousPlayer - 1) % state.ctx.numPlayers; // Repeat for previous player, ending at current player
 				}
 
+				// Add grass variation
+				if (cellValue == 'O' && !cellHasPlayer) {
+					cellVariation = 1;
+				}
 
 				// Draw valid moves
 				if (state.G.playerLocations[state.ctx.currentPlayer][2]) { // If player is in a room
-					return; // End early (Don't draw valid move markers if player is in room)
+					cellValid = false;
 				}
-				if (state.G._safeTiles.includes(cellValue)) { // If the tile is a safe tile, check if move indicators should be drawn ("." for now)
-					const deltaX = Math.abs(cellCoords[0] - state.G.playerLocations[state.ctx.currentPlayer][0]); // Getting abs distance from current player to this tile
-					const deltaY = Math.abs(cellCoords[1] - state.G.playerLocations[state.ctx.currentPlayer][1]);
-
-					if (!containsPlayer && deltaX + deltaY != 0 && deltaX + deltaY <= state.G.diceRoll[0]) { // If within correct distance, draw a move indicator
-						if (cellValue == "DN") { // If cell is an empty tile, actually draw a blank char
-							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DNV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
-						}
-						else if (cellValue == "DS") { // If cell is an empty tile, actually draw a blank char
-							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DSV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
-						}
-						else if (cellValue == "DE") { // If cell is an empty tile, actually draw a blank char
-							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DEV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
-						}
-						else if (cellValue == "DW") { // If cell is an empty tile, actually draw a blank char
-							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/DWV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
-						}
-						else {
-							cell.innerHTML = "<img src='https://nrmaultsaid.jalbum.net/images/slides/OV.png' style='width: 50px; height: 50px; object-fit; fill;'/>";
+				else {
+					if (state.G._safeTiles.includes(cellValue)) { // If the tile is a safe tile, check if move indicators should be drawn ("." for now)
+						const deltaX = Math.abs(cellCoords[0] - state.G.playerLocations[state.ctx.currentPlayer][0]); // Getting abs distance from current player to this tile
+						const deltaY = Math.abs(cellCoords[1] - state.G.playerLocations[state.ctx.currentPlayer][1]);
+						if (!cellHasPlayer && deltaX + deltaY != 0 && deltaX + deltaY <= state.G.diceRoll[0]) { // If within correct distance, draw a move indicator
+							cellValid = true;
 						}
 					}
 				}
-			}
-			);
 
-			// Display minimap
-			this.rootElement.querySelector('.minimap').innerHTML = '<tt>' + state.G._roomMap + '</tt><br>';
-			for (let ii = 0; ii < state.G._roomList.length; ii++) { // For each room,
-				const room = state.G._roomList[ii]; // Get the room
-				this.rootElement.querySelector('.minimap').innerHTML += 'Room ID ' + room[0] + ': '; // Display the room ID
-				this.rootElement.querySelector('.minimap').innerHTML += state.G._cardsInPlay[1][room[0]] + ' contains '; // Display the number of cards in play
-				let playersInRoom = 0; // Count the number of players in the room
-				for (let jj = 0; jj < state.G.playerLocations.length; jj++) { // For each player,
-					if (state.G.playerLocations[jj][2] == false) { // If the player is not in the room,
-						continue; // Skip to the next player
-					}
-					if (state.G.playerLocations[jj][3] == room[0]) { // If the player is in this room,
-						playersInRoom++; // Increment the player count
-						this.rootElement.querySelector('.minimap').innerHTML += 'Player ' + jj + ', '; // Display the player num
-					}
-				}
-				if (playersInRoom == 0) { // If there are no players in the room,
-					this.rootElement.querySelector('.minimap').innerHTML += 'no players'; // Display "no players"
-				}
-				this.rootElement.querySelector('.minimap').innerHTML += '<br>';
-			}
+				// Update cell image
+				let album = cellHasPlayer ? "Player" : "Tiles";
+				let image = cellValue + cellVariation + (cellValid ? 'V' : '') + playerValue;
+				cell.innerHTML = `<img src='https://nauviax.jalbum.net/${album}/slides/${image}.jpg' style='width: 50px; height: 50px; object-fit; fill;'/>`;
 
-			// Get the gameover message element. (I THINK THIS IS BROKEN NOW. Untested however)
-			const messageEl = this.rootElement.querySelector('.winner');
-			// Update the element to show a winner if any.
-			if (state.ctx.gameover) {
-				messageEl.textContent = 'Winner: ' + state.ctx.gameover.winner;
-			} else {
-				messageEl.textContent = '';
-			}
+				// ----- //
+
+				// Display minimap
+				this.rootElement.querySelector('.minimap').innerHTML = '<tt>' + state.G._roomMap + '</tt><br>';
+				for (let ii = 0; ii < state.G._roomList.length; ii++) { // For each room,
+					const room = state.G._roomList[ii]; // Get the room
+					this.rootElement.querySelector('.minimap').innerHTML += 'Room ID ' + room[0] + ': '; // Display the room ID
+					this.rootElement.querySelector('.minimap').innerHTML += state.G._cardsInPlay[1][room[0]] + ' contains '; // Display the number of cards in play
+					let playersInRoom = 0; // Count the number of players in the room
+					for (let jj = 0; jj < state.G.playerLocations.length; jj++) { // For each player,
+						if (state.G.playerLocations[jj][2] == false) { // If the player is not in the room,
+							continue; // Skip to the next player
+						}
+						if (state.G.playerLocations[jj][3] == room[0]) { // If the player is in this room,
+							playersInRoom++; // Increment the player count
+							this.rootElement.querySelector('.minimap').innerHTML += 'Player ' + jj + ', '; // Display the player num
+						}
+					}
+					if (playersInRoom == 0) { // If there are no players in the room,
+						this.rootElement.querySelector('.minimap').innerHTML += 'no players'; // Display "no players"
+					}
+					this.rootElement.querySelector('.minimap').innerHTML += '<br>';
+				}
+
+				// Get the gameover message element. (I THINK THIS IS BROKEN NOW. Untested however)
+				const messageEl = this.rootElement.querySelector('.winner');
+				// Update the element to show a winner if any.
+				if (state.ctx.gameover) {
+					messageEl.textContent = 'Winner: ' + state.ctx.gameover.winner;
+				} else {
+					messageEl.textContent = '';
+				}
+			});
 		}
 	}
-
 }
-
 class App {
 	constructor(rootElement) {
 		this.client = SplashScreen(rootElement).then((credentials) => {

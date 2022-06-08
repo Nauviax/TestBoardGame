@@ -40,9 +40,8 @@ export const KiwiKluedo = {
 	}),
 	name: 'KiwiKluedo',
 	turn: {
-		// order: TurnOrder.CONTINUE, // Basically, do NOT end the current players turn if the phase ends. (Phase ends after generation, so would skip player 0's first turn)
 		onBegin: (G, ctx) => (BeginTurn(G, ctx)), // Runs before each turn. Currently resets dice roll
-		endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out\
+		endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out
 	},
 	moves: {
 		rollDice: {
@@ -206,6 +205,12 @@ export const KiwiKluedo = {
 				if (winner != null && winner != undefined) {
 					console.log("Game Over! Winner is player " + winner);
 					return { winner };
+				}
+			},
+			turn: {
+				order: { // Start with player 0, then proceed normally (This is here to set player 0 as first)
+					first: (G, ctx) => 0,
+					next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
 				}
 			},
 		},
