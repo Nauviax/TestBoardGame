@@ -4,6 +4,7 @@ import { SocketIO } from 'boardgame.io/multiplayer';
 import { LobbyClient } from 'boardgame.io/client';
 
 var InitialMapGenerated = false;
+var grassMap = []; // Used to hold grass variations. Don't worry if you aren't messing with images on the board
 
 //For use IF we want to use the lobby to manage matches
 async function lobbyStart() {
@@ -112,11 +113,10 @@ class TestGameClient {
 		console.log("Creating board");
 		// Create a nxn board of cells
 		const rows = [];
-		const mapSize = state.G._mapSize * 3; // Each tile is 3x3
-		for (let i = 0; i < mapSize; i++) {
+		for (let ii = 0; ii < state.G._boardSize; ii++) {
 			const cells = [];
-			for (let j = 0; j < mapSize; j++) {
-				const id = mapSize * i + j;
+			for (let jj = 0; jj < state.G._boardSize; jj++) {
+				const id = state.G._boardSize * ii + jj;
 				cells.push(`<td class="cell" data-id="${id}"></td>`);
 			}
 			rows.push(`<tr>${cells.join('')}</tr>`);
@@ -129,6 +129,15 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<table cellspacing="0" cellpadding="0">${rows.join('')}</table>`; // THEY SAID IT COULDN'T BE DONE
 		this.rootElement.innerHTML += `<p class="minimap"></p>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
+
+		// Generate grass map (For board)
+		for (let ii = 0; ii < state.G._boardSize; ii++) {
+			grassMap.push([]);
+			for (let jj = 0; jj < state.G._boardSize; jj++) {
+				// Push a random number between 0 and 3
+				grassMap[ii].push(Math.floor(Math.random() * 4));
+			}
+		}
 	}
 
 	attachListeners() {
@@ -225,7 +234,8 @@ class TestGameClient {
 
 				// Add grass variation
 				if (cellValue == 'O' && !cellHasPlayer) {
-					cellVariation = 1;
+					// Get random number, 
+					cellVariation = grassMap[cellCoords[0]][cellCoords[1]];
 				}
 
 				// Draw valid moves
