@@ -130,16 +130,17 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<table>${rows.join('')}</table>`;
 		this.rootElement.innerHTML +=`<p class="winner"></p>`;
 		
-		//create and draw checkboxs for rooms
+		
+		
+		//create and draw checkboxs for rooms 
 		for (let ii = 0; ii < state.G._roomList.length; ii++) {//for each room in the room in game
 			const room = state.G._roomList[ii]; // Get the room
-			this.rootElement.innerHTML += `<p> ${ii}</p>`
+			this.rootElement.innerHTML += 'Room ID ' + room[0] + ': '; //Write the ID for each room next to the checkbox
 			//player locations for loop
 			for (let i = 0; i < state.G.playerLocations.length; i++){ //for each player on the board 
-				this.rootElement.innerHTML += `<input type="checkbox" id=${i}></input>` //Draw a checkbox for each room in game
+				this.rootElement.innerHTML += `<input type="checkbox" id=${i}></input>`; //Draw a checkbox for each room in game
 			}
-			//this.rootElement.innerHTML += `<p>Room: ${ii}</p>`; //Write the ID for each room next to the checkbox 
-			//<br> to add a new line 
+			this.rootElement.innerHTML += ' <br/>'; //<br> to add a new line 
 		}
 		
 	 }
