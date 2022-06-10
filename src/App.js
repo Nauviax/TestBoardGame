@@ -130,13 +130,22 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<p class="minimap"></p>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
-		// Create and draw checkboxs for rooms 
-		for (let ii = 0; ii < state.G._roomList.length; ii++) { // For each room in the room in game,
-			const room = state.G._roomList[ii]; // Get the room
-			this.rootElement.innerHTML += state.G._cardsInPlay[1][room[0]] + ': '; // Write the name of each room next to the checkbox
-			// Player for loop
-			for (let jj = 0; jj < state.ctx.numPlayers; jj++) { // For each player on the board,
-				this.rootElement.innerHTML += `<input type="checkbox" id=${jj}></input>`; // Draw a checkbox for each room in game
+
+		let playerStringTemp = "";
+		for (let ii = 0; ii < state.ctx.numPlayers; ii++) { // For each player on the board,
+			playerStringTemp += "Player " + ii + " ";
+		}
+		this.rootElement.innerHTML += `<p>${playerStringTemp}</p>`;
+
+		// Create and draw checkboxs for everything
+		for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
+			for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each room in the room in game,
+				this.rootElement.innerHTML += state.G._cardsInPlay[hh][ii] + ': '; // Write the name of each room next to the checkbox
+				// Player for loop
+				for (let jj = 0; jj < state.ctx.numPlayers; jj++) { // For each player on the board,
+					this.rootElement.innerHTML += `<input type="checkbox" id=${jj}"></input>`; // Draw a checkbox for each room in game
+				}
+				this.rootElement.innerHTML += ' <br/>'; // <br> to add a new line 
 			}
 			this.rootElement.innerHTML += ' <br/>'; // <br> to add a new line 
 		}
