@@ -126,28 +126,24 @@ class TestGameClient {
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
 		this.rootElement.innerHTML = `<h2>Player ${this.client.playerID}</h2>`;
 		this.rootElement.innerHTML += `<p>MatchID: ${this.client.matchID}</p>`;
-		this.rootElement.innerHTML += `<table>${rows.join('')}</table>`;
-		this.rootElement.innerHTML += `<p class="minimap"></p>`;
+		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> </div></div>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
-
-		// let playerStringTemp = "";
-		// for (let ii = 0; ii < state.ctx.numPlayers; ii++) { // For each player on the board,
-		// 	playerStringTemp += "Player " + ii + " ";
-		// }
-		// this.rootElement.innerHTML += `<p>${playerStringTemp}</p>`;
-
-		// Create and draw checkboxs for everything
+		// Create and draw checkboxs for everything	
+		const rbCheckbox = this.rootElement.querySelector(".rbCheckbox"); // Get the rbCheckbox element
+		const labels = ["Characters", "Rooms", "Items"]; // Displayed labels
 		for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
+			let htmlString = "";
+			htmlString += `<p><b>--${labels[hh]}--</b></p>`;
 			for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
-				this.rootElement.innerHTML += `<p>${state.G._cardsInPlay[hh][ii]}: </p>`; // Write the name of each card next to the checkbox
+				htmlString += `<p>${state.G._cardsInPlay[hh][ii]}: </p>`; // Write the name of each card next to the checkbox
 				// Player for loop
 				for (let jj = 0; jj < state.ctx.numPlayers; jj++) { // For each player on the board,
-					this.rootElement.innerHTML += `<input type="checkbox" id=${jj}>P${jj}</input>`; // Draw a checkbox for each room in game
+					htmlString += `<input type="checkbox" id=${jj}>P${jj}</input>`; // Draw a checkbox for each room in game
 				}
-				this.rootElement.innerHTML += ' <br/>'; // <br> to add a new line 
+				htmlString += ' <br/>'; // <br> to add a new line 
 			}
-			this.rootElement.innerHTML += ' <br/>'; // <br> to add a new line 
+			rbCheckbox.innerHTML += `<div class="innerCheckbox">${htmlString}</div>`; // <br> to add a new line 
 		}
 
 		// Generate grass map (For board)

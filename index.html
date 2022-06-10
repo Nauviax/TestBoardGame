@@ -12,22 +12,21 @@
 </body>
 
 <style>
+	.cellTable {
+		border: 2px solid black;
+		margin-bottom: 8px;
+		display: inline-block;
+		vertical-align: top;
+	}
+
 	.cell {
-		border: 0px solid rgba(#626262);
+		border: 0px;
+		margin: 0;
+		padding: 0;
 		width: 50px;
 		height: 50px;
 		line-height: 0px;
 		text-align: center;
-		background-color: rgb(128, 128, 128);
-	}
-
-	.checkbox {
-		padding: 15px 15px;
-		margin: 5px;
-		cursor: pointer;
-		border: black;
-		width: 15px;
-		height: 15px;
 	}
 
 	html,
@@ -36,16 +35,9 @@
 		padding: 0;
 	}
 
-	.content {
-		float: left;
-		width: 30%;
-		border: none;
-	}
-
-	.rightcontent {
-		float: right;
-		width: 30%;
-		border: none
+	.beInline {
+		display: inline-block;
+		vertical-align: top;
 	}
 
 	.hspacer {
@@ -53,8 +45,40 @@
 		float: left;
 	}
 
-	.clear {
-		clear: both;
+	.rbCheckbox {
+		border: 1px solid red;
+		padding: 5px;
+		max-width: 500px;
+		margin-top: 5px;
+	}
+
+	.innerCheckbox {
+		border: 1px solid black;
+		padding: 5px;
+		max-width: 150px;
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.minimap {
+		border: 1px solid blue;
+		padding: 10px;
+		margin: 0;
+	}
+
+	input[type="checkbox"] {
+		-webkit-appearance: initial;
+		appearance: initial;
+		background: ghostwhite;
+		border: 1px solid black;
+		margin-bottom: 0px;
+		margin-left: 10px;
+		width: 15px;
+		height: 15px;
+	}
+
+	input[type="checkbox"]:checked {
+		background: red;
 	}
 </style>
 
