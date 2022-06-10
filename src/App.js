@@ -3,7 +3,7 @@ import { KiwiKluedo } from './Game';
 import { SocketIO } from 'boardgame.io/multiplayer';
 import { LobbyClient } from 'boardgame.io/client';
 
-var InitialMapGenerated = false;
+var initialMapGenerated = false;
 var grassMap = []; // Used to hold grass variations. Don't worry if you aren't messing with images on the board
 
 //For use IF we want to use the lobby to manage matches
@@ -127,19 +127,18 @@ class TestGameClient {
 		this.rootElement.innerHTML = `<h2>Player ${this.client.playerID}</h2>`;
 		this.rootElement.innerHTML += `<p>MatchID: ${this.client.matchID}</p>`;
 		this.rootElement.innerHTML += `<table>${rows.join('')}</table>`;
+		this.rootElement.innerHTML += `<p class="minimap"></p>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
-
-
-		//create and draw checkboxs for rooms 
-		for (let ii = 0; ii < state.G._roomList.length; ii++) {//for each room in the room in game
+		// Create and draw checkboxs for rooms 
+		for (let ii = 0; ii < state.G._roomList.length; ii++) { // For each room in the room in game,
 			const room = state.G._roomList[ii]; // Get the room
-			this.rootElement.innerHTML += 'Room ID ' + room[0] + ': '; //Write the ID for each room next to the checkbox
-			//player locations for loop
-			for (let i = 0; i < state.G.playerLocations.length; i++) { //for each player on the board 
-				this.rootElement.innerHTML += `<input type="checkbox" id=${i}></input>`; //Draw a checkbox for each room in game
+			this.rootElement.innerHTML += state.G._cardsInPlay[1][room[0]] + ': '; // Write the name of each room next to the checkbox
+			// Player for loop
+			for (let jj = 0; jj < state.ctx.numPlayers; jj++) { // For each player on the board,
+				this.rootElement.innerHTML += `<input type="checkbox" id=${jj}></input>`; // Draw a checkbox for each room in game
 			}
-			this.rootElement.innerHTML += ' <br/>'; //<br> to add a new line 
+			this.rootElement.innerHTML += ' <br/>'; // <br> to add a new line 
 		}
 
 		// Generate grass map (For board)
@@ -234,6 +233,7 @@ class TestGameClient {
 		} else if (!this.connected) {
 			this.onConnected();
 		}
+		console.log("Map values set: " + state.G._mapValuesSet + ", InitialMapGenerated: " + initialMapGenerated + ", MapGenerated: " + state.G._mapGenerated);
 		if (!state.G._mapValuesSet) { // DO NOT DELETE THIS IF STATEMENT! update() MUST return early if map values have not been set.
 
 			// THIS IS ONLY TEMPORARY! Please implement some way to set values, like small/med/large map/game modes. (Boardsize, RoomNum, ItemNum, CharNum)
@@ -250,17 +250,15 @@ class TestGameClient {
 			return; // Do nothing
 		}
 
-		if (!InitialMapGenerated) { // Create cells on the screen on first update
+		if (!initialMapGenerated) { // Create cells on the screen on first update
 			console.log("Initial map generation");
 			this.createBoard(state);
 			this.attachListeners();
-			InitialMapGenerated = true;
+			initialMapGenerated = true;
 			return; // Try not to delete this return line, it prevents crashes.
 		}
 
 		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
-			// Get board size
-			const mapSize = state.G._mapSize * 3; // Each tile is 3x3
 			//Number of colours for players
 			const numberOfColours = 6;
 			// Get all the board cells.
@@ -268,7 +266,7 @@ class TestGameClient {
 			// Update cells to display the values in game state.
 			cells.forEach(cell => {
 				const cellID = parseInt(cell.dataset.id);
-				const cellCoords = [cellID % mapSize, Math.floor(cellID / mapSize)];
+				const cellCoords = [cellID % state.G._boardSize, Math.floor(cellID / state.G._boardSize)];
 
 				let cellValue = state.G.cells[cellCoords[0]][cellCoords[1]]; // 2D array yay, contains the ID of the cell
 				let cellValid = false; // True if tile is valid move (Adds a 'V' to the link)

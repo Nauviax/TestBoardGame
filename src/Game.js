@@ -181,6 +181,7 @@ export const KiwiKluedo = {
 						G._roomNum = RoomNum;
 						G._itemNum = ItemNum;
 						G._charNum = CharNum;
+						GenerateEverything(G, ctx); // Generate everything
 						G._mapValuesSet = true; // Begin game
 					},
 				}
@@ -192,10 +193,6 @@ export const KiwiKluedo = {
 			}
 		},
 		Main: {
-			// Called at the beginning of a phase.
-			onBegin: (G, ctx) => {
-				GenerateEverything(G, ctx);
-			},
 			endIf: (G, ctx) => { // End the game if a player has won
 				let winner = G._winner;
 				if (winner != null && winner != undefined) {
