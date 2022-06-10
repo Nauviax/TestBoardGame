@@ -234,13 +234,13 @@ class TestGameClient {
 		} else if (!this.connected) {
 			this.onConnected();
 		}
-
 		if (!state.G._mapValuesSet) { // DO NOT DELETE THIS IF STATEMENT! update() MUST return early if map values have not been set.
 
 			// THIS IS ONLY TEMPORARY! Please implement some way to set values, like small/med/large map/game modes. (Boardsize, RoomNum, ItemNum, CharNum)
 			// Note that this move can be made ANYWHERE, not just in update(). It is here for now so it is automatically played.
 
 			this.client.moves.GenerateMapWithValues(6, 6, 6, 6);
+			console.log("Map values set");
 
 			// More testing values
 			// this.client.moves.GenerateMapWithValues(4, 4, 4, 4);
@@ -251,10 +251,10 @@ class TestGameClient {
 		}
 
 		if (!InitialMapGenerated) { // Create cells on the screen on first update
+			console.log("Initial map generation");
 			this.createBoard(state);
 			this.attachListeners();
 			InitialMapGenerated = true;
-			this.createCheckBox();
 			return; // Try not to delete this return line, it prevents crashes.
 		}
 
