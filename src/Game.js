@@ -9,6 +9,7 @@ var SAFETILES = ['O', 'DN', 'DS', 'DW', 'DE']; // Stores the tiles a player can 
 var CHARACTERS = [ // Stores the possible character names for the game
 	"Farmer Brown", "Daisy the Cow", "Sam the Shearer", "Brad the Surfer Dude", "Sharon the Campsite Owner", "Krystal the Lifeguard", "Kev the Tradie", "Hemi the Tour Operator", "Peter the Tolkien fan",
 ];
+var CHARACTERSpriority = []; // Stores priority names that must be included. Usually player names
 var ROOMS = [ // Stores the possible room names for the game
 	"Batch", "Swimming pool", "Sleepout", "The Longdrop", "By the trampoline", "Campsite", "Sheep paddock", "Cow paddock", "Shed", "Farm House", "Barn", "Milk Shed", "Beach front", "Placings 10"
 ];
@@ -175,12 +176,13 @@ export const KiwiKluedo = {
 			// Map settings move
 			moves: {
 				GenerateMapWithValues: {
-					move: (G, ctx, MapSize, RoomNum, ItemNum, CharNum) => {
+					move: (G, ctx, MapSize, RoomNum, ItemNum, CharNum, CharArray) => { // Char is for character btw
 						G._mapSize = MapSize;
 						G._boardSize = MapSize * 3;
 						G._roomNum = RoomNum;
 						G._itemNum = ItemNum;
 						G._charNum = CharNum;
+						CHARACTERSpriority = CharArray; // Include player names in the game
 						GenerateEverything(G, ctx); // Generate everything
 						G._mapValuesSet = true; // Begin game
 					},
@@ -214,11 +216,12 @@ export const KiwiKluedo = {
 
 function DealInventories(G, ctx) { // Deals the inventories of each player, and sets the game answer
 	let charNames = CHARACTERS.slice(); // Copy the character names
+	let charNamesPriority = CHARACTERSpriority.slice(); // Copy the priority character names
 	let roomNames = ROOMS.slice();
 	let itemNames = ITEMS.slice();
 	let answer = [];
 	// Ensure there are enough characters, items and room names for the game
-	while (charNames.length < G._charNum) {
+	while (charNames.length + charNamesPriority.length < G._charNum) {
 		charNamesCopy = charNames.slice();
 		for (let ii = 0; ii < charNamesCopy.length; ii++) { // Append to each new name so that each name is unique
 			charNamesCopy[ii] += ' (copy)';
@@ -244,7 +247,7 @@ function DealInventories(G, ctx) { // Deals the inventories of each player, and 
 	roomNames = Shuffle(roomNames);
 	itemNames = Shuffle(itemNames);
 	// Remove values until there are the correct number of characters, items and rooms
-	while (charNames.length > G._charNum) {
+	while (charNames.length + charNamesPriority.length > G._charNum) { // Priority characters are not removed
 		charNames.shift();
 	}
 	while (itemNames.length > G._itemNum) {
@@ -254,6 +257,10 @@ function DealInventories(G, ctx) { // Deals the inventories of each player, and 
 		roomNames.shift();
 	}
 	// These cards will all be used in the game. Save copies of them to the game state.
+	for (let ii = 0; ii < charNamesPriority.length; ii++) { // Add priority names to the game state
+		charNames.push(charNamesPriority[ii]); // Side effect of forcing min charNum to be the same as player count (Which is fine)
+	}
+	charNames = Shuffle(charNames); // Mix them up again
 	G._cardsInPlay = [charNames.slice(), roomNames.slice(), itemNames.slice()];
 	// Get a random character, add it to answer and remove it from charNames. Repeat for room and item
 	answer.push(charNames.shift());

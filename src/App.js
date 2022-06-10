@@ -244,13 +244,13 @@ class TestGameClient {
 			// THIS IS ONLY TEMPORARY! Please implement some way to set values, like small/med/large map/game modes. (Boardsize, RoomNum, ItemNum, CharNum)
 			// Note that this move can be made ANYWHERE, not just in update(). It is here for now so it is automatically played.
 
-			this.client.moves.GenerateMapWithValues(6, 6, 6, 6);
+			this.client.moves.GenerateMapWithValues(6, 6, 6, 6, ["PriorityName1", "PriorityName2"]);
 			console.log("Map values set");
 
 			// More testing values
-			// this.client.moves.GenerateMapWithValues(4, 4, 4, 4);
-			// this.client.moves.GenerateMapWithValues(8, 8, 8, 8);
-			// this.client.moves.GenerateMapWithValues(10, 10, 10, 10);
+			// this.client.moves.GenerateMapWithValues(4, 4, 4, 4, []);
+			// this.client.moves.GenerateMapWithValues(8, 8, 8, 8, []);
+			// this.client.moves.GenerateMapWithValues(10, 10, 10, 10, []);
 
 			return; // Do nothing
 		}
