@@ -32,7 +32,7 @@ function SplashScreen(rootElement) {
 			button.onclick = () => {
 				const matchID = document.getElementById('MatchID').value;
 				const returnValue = [playerID, matchID];
-				resolve(returnValue);
+				resolve(returnValue)
 			};
 			rootElement.append(button);
 		};
@@ -129,6 +129,18 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<table cellspacing="0" cellpadding="0">${rows.join('')}</table>`; // THEY SAID IT COULDN'T BE DONE
 		this.rootElement.innerHTML += `<p class="minimap"></p>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
+
+		// Create and draw checkboxs for rooms
+		for (let ii = 0; ii < state.G._roomList.length; ii++) {// For each room in the room in game,
+			const room = state.G._roomList[ii]; // Get the room
+			this.rootElement.innerHTML += `<p> ${ii}</p>`
+			// Player locations for loop
+			for (let i = 0; i < state.G.playerLocations.length; i++) { // For each player on the board,
+				this.rootElement.innerHTML += `<input type="checkbox" id=${i}></input>` // Draw a checkbox for each room in game
+			}
+			// this.rootElement.innerHTML += `<p>Room: ${ii}</p>`; // Write the ID for each room next to the checkbox 
+			// <br> to add a new line 
+		}
 
 		// Generate grass map (For board)
 		for (let ii = 0; ii < state.G._boardSize; ii++) {
@@ -242,7 +254,8 @@ class TestGameClient {
 			this.createBoard(state);
 			this.attachListeners();
 			InitialMapGenerated = true;
-			return;
+			this.createCheckBox();
+			return; // Try not to delete this return line, it prevents crashes.
 		}
 
 		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
@@ -358,3 +371,5 @@ class App {
 console.log("Creating App");
 const appElement = document.getElementById('app');
 new App(appElement);
+
+
