@@ -131,23 +131,17 @@ class TestGameClient {
 		this.rootElement.innerHTML +=`<p class="winner"></p>`;
 		
 		//create and draw checkboxs for rooms
-		for (let ii = 0; ii < state.G._roomList.length; ii++) {//for each room in the room list
+		for (let ii = 0; ii < state.G._roomList.length; ii++) {//for each room in the room in game
 			const room = state.G._roomList[ii]; // Get the room
-			this.rootElement.innerHTML += `<input type="checkbox" id=${ii}></input>` //Draw a checkbox for each room in game
-			this.rootElement.innerHTML += `<p>Room: ${ii}</p>`; //Write the ID for each room next to the checkbox 
-				//<br> to add a new line 
+			this.rootElement.innerHTML += `<p> ${ii}</p>`
+			//player locations for loop
+			for (let i = 0; i < state.G.playerLocations.length; i++){ //for each player on the board 
+				this.rootElement.innerHTML += `<input type="checkbox" id=${i}></input>` //Draw a checkbox for each room in game
+			}
+			//this.rootElement.innerHTML += `<p>Room: ${ii}</p>`; //Write the ID for each room next to the checkbox 
+			//<br> to add a new line 
 		}
-	// 	//create and draw checkboxes for each player
-	// 	for (let ii = 0; ii < state.G.playerIDs.length ; ii++) {//for each player 
-	// 		const room = state.G.playerIDs[ii]; // Get the player ID
-	// 		this.rootElement.innerHTML += `<input type="checkbox" id=${ii}></input>` //Draw a checkbox for each player in game
-	// 			//<br> to add a new line 
-	// 	}
-	// 	for (let ii = 0; ii < state.G._itemNum.length ; ii++) {//for each item in the item list
-	// 		const room = state.G._itemNum[ii]; // Get item
-	// 		this.rootElement.innerHTML += `<input type="checkbox" id=${ii}></input>` //Draw a checkbox for each item in game
-	// 			//<br> to add a new line 
-	// 	}
+		
 	 }
 	attachListeners() {
 		console.log("Attaching listeners");
@@ -222,9 +216,6 @@ class TestGameClient {
 		} else {
 			messageEl.textContent = '';
 		}
-
-		//display a list of checkboxes for the playes to keep track of cards and guesses
-		//this.rootElement.querySelector('.checkbox').innerHTML = '<tt>' + state.G._roomMap + '</tt><br>';	
 	}	
 }
 
