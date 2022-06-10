@@ -130,8 +130,6 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<table>${rows.join('')}</table>`;
 		this.rootElement.innerHTML +=`<p class="winner"></p>`;
 		
-		
-		
 		//create and draw checkboxs for rooms 
 		for (let ii = 0; ii < state.G._roomList.length; ii++) {//for each room in the room in game
 			const room = state.G._roomList[ii]; // Get the room
@@ -142,7 +140,6 @@ class TestGameClient {
 			}
 			this.rootElement.innerHTML += ' <br/>'; //<br> to add a new line 
 		}
-		
 	 }
 	attachListeners() {
 		console.log("Attaching listeners");
