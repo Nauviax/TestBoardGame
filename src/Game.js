@@ -7,13 +7,13 @@ var SAFETILES = ['O', 'DN', 'DS', 'DW', 'DE']; // Stores the tiles a player can 
 
 // The following names are all placeholders. Don't take them too seriously
 var CHARACTERS = [ // Stores the possible character names for the game
-	"John", "Jhon", "Jack", "James", "Jeremy", "Jerald", "Jerome", "Jeorge", "Jessica", "Jone", "Jeremiah", "Jannet", "Josh", "Joseph", "Julian", "Jayden", "Jon", "Joey", "Jax", "Micheal the Destroyer of Worlds", "Jake"
+	"Farmer Brown", "Daisy the Cow", "Sam the Shearer", "Brad the Surfer Dude", "Sharon the Campsite Owner", "Krystal the Lifeguard", "Kev the Tradie", "Hemi the Tour Operator", "Peter the Tolkien fan",
 ];
 var ROOMS = [ // Stores the possible room names for the game
-	"Kitchen", "Kitchenette", "Kitchen-Diner", "Gallery", "Cookhouse", "Bakehouse", "Scullery", "Cookery", "Canteen", "Bakery", "Pantry", "Caboose", "Eat-in", "Mess", "Cooking Area"
+	"Batch", "Swimming pool", "Sleepout", "The Longdrop", "By the trampoline", "Campsite", "Sheep paddock", "Cow paddock", "Shed", "Farm House", "Barn", "Milk Shed", "Beach front", "Placings 10"
 ];
 var ITEMS = [ // Stores the possible item names for the game
-	"Stick", "Stone", "Big Stick", "Two Stones", "Two Birds", "One Big Bird", "One Big Stone", "Two Big Sticks", "A Stick and Two Stones", "The Neighbours Outdoor Table", "The Neighbours Front Door", "My Front Door", "My Front Door and Two Big Sticks", "A Rock shaped like a Kiwi", "A Kiwi", "An Evil Kiwi"
+	"Steel capped Gumboot", "Broken bottle of Tui", "Buzzy Bee (slipped on)", "Large Chilly Bin", "Poisoned Sauvignon Blanc from Marlborough", "Smothered/Suffocated by Pavlova", "Electrocuted by an Electric Fence", "Strangled by No. 8 Fencing Wire or a Bungee Cord", "Crushed by a box-set of LOTR DVDs (the Director's Cut)", "Sat on by an All Black",
 ];
 
 export const KiwiKluedo = {
