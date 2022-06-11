@@ -1,5 +1,5 @@
 var GAMEMAP = null; // Hopefully a global variable
-var MAPSIZE = 5; // The size of the map (NxN)
+var MAPSIZE = 10; // The size of the map (NxN)
 
 export const TestGame = {
 	setup: () => ({
@@ -79,7 +79,7 @@ export const TestGame = {
 function IsVictory(playerLocations, currentPlayer) {
 	// A player wins if it moves next to another player
 	const playerDistance = Math.abs(playerLocations[0] - playerLocations[1]);
-	if (playerDistance == 1 || playerDistance == 5) {
+	if (playerDistance == 1 || playerDistance == 10) {
 		return currentPlayer;
 	}
 	else {

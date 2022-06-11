@@ -17,10 +17,10 @@ class TestGameClient {
 	createBoard() {
 		// Create a 5x5 board of cells
 		const rows = [];
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < 10; i++) {
 			const cells = [];
-			for (let j = 0; j < 5; j++) {
-				const id = 5 * i + j;
+			for (let j = 0; j < 10; j++) {
+				const id = 10 * i + j;
 				cells.push(`<td class="cell" data-id="${id}"></td>`);
 			}
 			rows.push(`<tr>${cells.join('')}</tr>`);
@@ -53,10 +53,10 @@ class TestGameClient {
 		const playerLocation = state.G.playerLocations[state.ctx.playOrderPos];
 		cells.forEach(cell => {
 			const cellId = parseInt(cell.dataset.id);
-			const cellValue = state.G.cells[Math.floor(cellId / 5)][cellId % 5]; // 2D array yay
+			const cellValue = state.G.cells[cellId % 10][Math.floor(cellId / 10)]; // 2D array yay
 			if (cellValue === null) {
-				const deltaX = cellId % 5 - playerLocation % 5;
-				const deltaY = Math.floor(cellId / 5) - Math.floor(playerLocation / 5);
+				const deltaX = cellId % 10 - playerLocation % 10;
+				const deltaY = Math.floor(cellId / 10) - Math.floor(playerLocation / 10);
 				if (!state.ctx.gameover && ((deltaX == 0) != (deltaY == 0))) { // Implements xor
 					cell.textContent = "•";
 				}
