@@ -126,7 +126,7 @@ class TestGameClient {
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
 		this.rootElement.innerHTML = `<h2>Player ${this.client.playerID}</h2>`;
 		this.rootElement.innerHTML += `<p>MatchID: ${this.client.matchID}</p>`;
-		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> </div></div>`;
+		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> <div class="diceButton" id="diceButton"></div> </div></div>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
 		// Create and draw checkboxs for everything	
@@ -145,6 +145,9 @@ class TestGameClient {
 			}
 			rbCheckbox.innerHTML += `<div class="innerCheckbox">${htmlString}</div>`; // <br> to add a new line 
 		}
+		
+		
+		
 
 		// Generate grass map (For board)
 		for (let ii = 0; ii < state.G._boardSize; ii++) {
@@ -212,6 +215,8 @@ class TestGameClient {
 		// Attach the evenit listener to each of the board cells.
 		const cells = this.rootElement.querySelectorAll('.cell');
 
+
+
 		// This event handler will read the cell id from a cell’s `data-id` attribute and make the `clickCell` move.
 		const handleCellClick = event => {
 			let id = parseInt(event.target.dataset.id);
@@ -229,7 +234,12 @@ class TestGameClient {
 		cells.forEach(cell => {
 			cell.onclick = handleCellClick;
 		});
+		
+
+
 	}
+
+			
 
 	update(state) {
 		if (state === null) {
@@ -266,6 +276,16 @@ class TestGameClient {
 		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
 			//Number of colours for players
 			const numberOfColours = 6;
+			//Roll dice button
+			const diceButton = document.getElementById('diceButton');
+			
+			if (state.G.diceRoll[3] != false){
+				diceButton.textContent = "Dice Roll: " + state.G.diceRoll[1] + " + " + state.G.diceRoll[2] + " = " + state.G.diceRoll[0];
+			}
+			else{
+				diceButton.textContent = "Roll Dice!";
+			}
+
 			// Get all the board cells.
 			const cells = this.rootElement.querySelectorAll('.cell');
 			// Update cells to display the values in game state.
@@ -319,6 +339,7 @@ class TestGameClient {
 					}
 				}
 
+				
 				// Update cell image
 				let album = cellHasPlayer ? "Player" : "Tiles";
 				let image = cellValue + cellVariation + (cellValid ? 'V' : '') + playerValue;
