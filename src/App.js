@@ -145,9 +145,9 @@ class TestGameClient {
 			}
 			rbCheckbox.innerHTML += `<div class="innerCheckbox">${htmlString}</div>`; // <br> to add a new line 
 		}
-		
-		
-		
+
+
+
 
 		// Generate grass map (For board)
 		for (let ii = 0; ii < state.G._boardSize; ii++) {
@@ -214,8 +214,8 @@ class TestGameClient {
 		console.log("Attaching listeners");
 		// Attach the evenit listener to each of the board cells.
 		const cells = this.rootElement.querySelectorAll('.cell');
-
-
+		// Ditto for buttons
+		const diceButton = this.rootElement.querySelector('.diceButton');
 
 		// This event handler will read the cell id from a cell’s `data-id` attribute and make the `clickCell` move.
 		const handleCellClick = event => {
@@ -234,12 +234,16 @@ class TestGameClient {
 		cells.forEach(cell => {
 			cell.onclick = handleCellClick;
 		});
-		
 
+		const handleRollClick = event => {
+			console.log("Clicked dice");
+			this.client.moves.rollDice();
+		}
 
+		diceButton.onclick = handleRollClick;
 	}
 
-			
+
 
 	update(state) {
 		if (state === null) {
@@ -273,16 +277,21 @@ class TestGameClient {
 			return; // Try not to delete this return line, it prevents crashes.
 		}
 
-		if (state.G._mapGenerated) { // Handle cell updates only if a map is generated
-			//Number of colours for players
+		if (state.G._mapGenerated) { // Handle updates only if a map is generated
+			// Number of colours for players
 			const numberOfColours = 6;
-			//Roll dice button
+			// Roll dice button
 			const diceButton = document.getElementById('diceButton');
-			
-			if (state.G.diceRoll[3] != false){
-				diceButton.textContent = "Dice Roll: " + state.G.diceRoll[1] + " + " + state.G.diceRoll[2] + " = " + state.G.diceRoll[0];
+
+			if (state.G.diceRoll[3]) { // When dice has been rolled,
+				if (state.G.diceRoll[1] + state.G.diceRoll[2] == state.G.diceRoll[0]) { // If player hasn't moved yet,
+					diceButton.textContent = "Dice Roll: " + state.G.diceRoll[1] + " + " + state.G.diceRoll[2] + " = " + state.G.diceRoll[0];
+				}
+				else { // Player has moved
+					diceButton.textContent = "Distance left: " + state.G.diceRoll[0];
+				}
 			}
-			else{
+			else {
 				diceButton.textContent = "Roll Dice!";
 			}
 
@@ -339,7 +348,7 @@ class TestGameClient {
 					}
 				}
 
-				
+
 				// Update cell image
 				let album = cellHasPlayer ? "Player" : "Tiles";
 				let image = cellValue + cellVariation + (cellValid ? 'V' : '') + playerValue;
