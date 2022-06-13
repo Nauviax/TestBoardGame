@@ -126,7 +126,7 @@ class TestGameClient {
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
 		this.rootElement.innerHTML = `<h2>Player ${this.client.playerID}</h2>`;
 		this.rootElement.innerHTML += `<p>MatchID: ${this.client.matchID}</p>`;
-		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> <div class="diceButton" id="diceButton"></div> </div></div>`;
+		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> <div class="diceButton" id="diceButton"></div> <div class="endButton" id="endButton"></div> </div></div>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
 		// Create and draw checkboxs for everything	
@@ -146,7 +146,9 @@ class TestGameClient {
 			rbCheckbox.innerHTML += `<div class="innerCheckbox">${htmlString}</div>`; // <br> to add a new line 
 		}
 
-
+		//Set text for the end turn button
+		const endButton = document.getElementById("endButton");
+		endButton.textContent = "End Turn";
 
 
 		// Generate grass map (For board)
@@ -216,6 +218,7 @@ class TestGameClient {
 		const cells = this.rootElement.querySelectorAll('.cell');
 		// Ditto for buttons
 		const diceButton = this.rootElement.querySelector('.diceButton');
+		const endButton = this.rootElement.querySelector('.endButton');
 
 		// This event handler will read the cell id from a cell’s `data-id` attribute and make the `clickCell` move.
 		const handleCellClick = event => {
@@ -236,11 +239,17 @@ class TestGameClient {
 		});
 
 		const handleRollClick = event => {
-			console.log("Clicked dice");
+			console.log("Rolled dice");
 			this.client.moves.rollDice();
 		}
 
+		const handleEndClick = event => {
+			console.log("Ended Turn");
+			this.client.events.endTurn();
+		}
+
 		diceButton.onclick = handleRollClick;
+		endButton.onclick = handleEndClick;
 	}
 
 
