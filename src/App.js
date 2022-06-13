@@ -168,10 +168,14 @@ class TestGameClient {
 
 		// Add the HTML to our app <div>.
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
-		this.rootElement.innerHTML = `<h2>Player ${this.client.playerID}</h2>`;
-		this.rootElement.innerHTML += `<p>MatchID: ${this.client.matchID}</p>`;
+		//this.rootElement.innerHTML = `<h2 style="font-family: Arial;font-size: 30px">MatchID: ${this.client.matchID} --> Player ${this.client.playerID} </h2>`;
+		this.rootElement.innerHTML = `<h2 id='idNames'>MatchID: ${this.client.matchID} --> Player ${this.client.playerID} </h2>`;
+		document.getElementById("idNames").style.fontFamily = "Arial";
+		document.getElementById("idNames").style.fontSize = "30px";
+
 		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> <div class="diceButton" id="diceButton"></div> <div class="endButton" id="endButton"></div> </div></div>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
+
 
 		// Create and draw checkboxs for everything	
 		const rbCheckbox = this.rootElement.querySelector(".rbCheckbox"); // Get the rbCheckbox element
@@ -272,6 +276,8 @@ class TestGameClient {
 		for (let jj = 0; jj < playerCards.length - 1; jj++){
 			this.rootElement.innerHTML += `<p class="playerCards">${playerCards[jj]}</p>`;
 		}
+
+		document.querySelectorAll('p').forEach(e => e.style.fontFamily = "Arial");
 
 	}
 
