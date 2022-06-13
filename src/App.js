@@ -210,6 +210,25 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DSP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DWP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DEP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+	
+		//consts for getting the cards from the players hand
+		const listOfCards = [];
+		let playerCardsString = "";
+		//adds each category of card to the list of cards
+		for (let ii = 0; ii < state.G._startingInventories[this.client.playerID].length; ii++){
+			listOfCards.push(state.G._startingInventories[this.client.playerID][[ii], [ii], [ii]].toString());		
+		}
+		//Adds each card to the card string
+		listOfCards.forEach(cards => {
+			playerCardsString += cards + ", ";
+		});
+		//splits the cards into individual elements
+		const playerCards = playerCardsString.split(",");
+		//Displays all of the cards to the screen
+		for (let jj = 0; jj < playerCards.length - 1; jj++){
+			this.rootElement.innerHTML += `<p class="playerCards">${playerCards[jj]}</p>`;
+		}
+
 	}
 
 	attachListeners() {
@@ -242,7 +261,7 @@ class TestGameClient {
 			console.log("Rolled dice");
 			this.client.moves.rollDice();
 		}
-
+		//Hnadles the end button click
 		const handleEndClick = event => {
 			console.log("Ended Turn");
 			this.client.events.endTurn();
