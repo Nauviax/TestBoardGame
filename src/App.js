@@ -6,6 +6,11 @@ import { LobbyClient } from 'boardgame.io/client';
 var initialMapGenerated = false;
 var grassMap = []; // Used to hold grass variations. Don't worry if you aren't messing with images on the board
 
+var numChars = 0;
+var numItems = 0;
+var numRooms = 0;
+var boardSize = 0;
+
 //For use IF we want to use the lobby to manage matches
 async function lobbyStart() {
 	const lobbyClient = new LobbyClient({ server: 'http://localhost:8088' });
@@ -30,6 +35,24 @@ function SplashScreen(rootElement) {
 			button.id = "PlayerButton" + playerID;
 			button.textContent = 'Player ' + playerID;
 			button.onclick = () => {
+				if(document.getElementById('short').checked){
+					numChars = 4;
+					numRooms = 5;
+					numItems = 4;
+					boardSize = 6;
+				}
+				else if(document.getElementById('medium').checked){
+					numChars = 6;
+					numRooms = 7;
+					numItems = 6;
+					boardSize = 6;
+				}
+				else if(document.getElementById('long').checked){
+					numChars = 9;
+					numRooms = 10;
+					numItems = 9;
+					boardSize = 8;
+				}
 				const matchID = document.getElementById('MatchID').value;
 				const returnValue = [playerID, matchID];
 				resolve(returnValue)
@@ -46,6 +69,17 @@ function SplashScreen(rootElement) {
 		textbox.id = "MatchID";
 		//rootElement.innerHTML += '<div id="lobby">';
 		rootElement.append(textbox);
+		rootElement.innerHTML += '<br><br>';
+
+		rootElement.innerHTML += "<p> Length of game: </p>";
+		rootElement.innerHTML += '<input type="radio" id="short" name="length">'
+		rootElement.innerHTML += '<label for = "short">Short</label>';
+		rootElement.innerHTML += '<input type="radio" id="medium" name="length" checked>'
+		rootElement.innerHTML += '<label for = "medium">Medium</label>';
+		rootElement.innerHTML += '<input type="radio" id="long" name="length">'
+		rootElement.innerHTML += '<label for = "long">Long</label>';
+		rootElement.innerHTML += '<br><br>';
+
 		rootElement.innerHTML += ` <p>Play as:</p>`;
 		const playerIDs = ['0', '1'];
 		playerIDs.forEach(createButton);
@@ -291,7 +325,8 @@ class TestGameClient {
 			// THIS IS ONLY TEMPORARY! Please implement some way to set values, like small/med/large map/game modes. (Boardsize, RoomNum, ItemNum, CharNum)
 			// Note that this move can be made ANYWHERE, not just in update(). It is here for now so it is automatically played.
 
-			this.client.moves.GenerateMapWithValues(6, 6, 6, 6, ["PriorityName1", "PriorityName2"]);
+			//this.client.moves.GenerateMapWithValues(6, 6, 6, 6, ["PriorityName1", "PriorityName2"]);
+			this.client.moves.GenerateMapWithValues(boardSize, numRooms, numItems, numChars, ["PriorityName1", "PriorityName2"]);
 			console.log("Map values set");
 
 			// More testing values
