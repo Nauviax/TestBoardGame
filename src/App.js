@@ -53,7 +53,7 @@ function SplashScreen(rootElement) {
 
 
 		document.getElementById("title").style.fontFamily = "Arial";
-		document.getElementById("title").style.fontSize = "50px";
+		document.getElementById("title").style.fontSize = "75px";
 		document.getElementById("title").style.color = "seagreen";
 
 		document.getElementById("PlayerButton0").style.padding = "16px 32px";
@@ -70,7 +70,12 @@ function SplashScreen(rootElement) {
 		document.getElementById("PlayerButton1").style.color = "#EFE8D8";
 		document.getElementById("PlayerButton1").style.cursor = "pointer";
 		document.getElementById("PlayerButton1").style.border = "none";
-		document.getElementById("PlayerButton1").style.fontSize = "16px"
+		document.getElementById("PlayerButton1").style.fontSize = "16px";
+
+		document.querySelectorAll('p').forEach(e => e.style.fontFamily = "Arial");
+		document.querySelectorAll('label').forEach(e => e.style.fontFamily = "Arial");
+		document.querySelectorAll('p').forEach(e => e.style.fontSize = "30px");
+		document.querySelectorAll('label').forEach(e => e.style.fontSize = "30px");
 
 		document.body.style.backgroundColor = "#EFE8D8";
 
