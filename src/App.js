@@ -36,21 +36,21 @@ function SplashScreen(rootElement) {
 			button.textContent = 'Player ' + playerID;
 			button.onclick = () => {
 				if(document.getElementById('short').checked){
-					numChars = 4;
-					numRooms = 5;
-					numItems = 4;
+					numChars = getRndInteger(3,5);
+					numRooms = getRndInteger(4,6);
+					numItems = getRndInteger(3,5);
 					boardSize = 6;
 				}
 				else if(document.getElementById('medium').checked){
-					numChars = 6;
-					numRooms = 7;
-					numItems = 6;
+					numChars = getRndInteger(5,7);
+					numRooms = getRndInteger(6,8);
+					numItems = getRndInteger(5,7);
 					boardSize = 6;
 				}
 				else if(document.getElementById('long').checked){
-					numChars = 9;
-					numRooms = 10;
-					numItems = 9;
+					numChars = getRndInteger(8,10);
+					numRooms = getRndInteger(9,11);
+					numItems = getRndInteger(8,10);
 					boardSize = 8;
 				}
 				const matchID = document.getElementById('MatchID').value;
@@ -116,6 +116,10 @@ function SplashScreen(rootElement) {
 
 	});
 }
+
+function getRndInteger(min, max) {
+	return Math.floor(Math.random() * (max - min) ) + min;
+  }
 
 // To launch this app, type 'npm start' into a console
 // And to run the server type 'npm run serve' in a second console
