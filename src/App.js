@@ -10,6 +10,9 @@ var numChars = 0;
 var numItems = 0;
 var numRooms = 0;
 var boardSize = 0;
+var playerName1 = "Player 1";
+var playerName2 = "Player 2";
+var playerName = "Player 1";
 
 //For use IF we want to use the lobby to manage matches
 async function lobbyStart() {
@@ -53,6 +56,13 @@ function SplashScreen(rootElement) {
 					numItems = getRndInteger(8,10);
 					boardSize = 8;
 				}
+				// if(playerID == 0){
+				// 	playerName1 = document.getElementById('PlayerName').value;
+				// }
+				// else if(playerID == 1){
+				// 	playerName2 = document.getElementById('PlayerName').value;
+				// }
+				playerName = document.getElementById('PlayerName').value;
 				const matchID = document.getElementById('MatchID').value;
 				const returnValue = [playerID, matchID];
 				resolve(returnValue)
@@ -72,6 +82,16 @@ function SplashScreen(rootElement) {
 		rootElement.append(textbox);
 		rootElement.innerHTML += '<br><br>';
 
+		rootElement.innerHTML += '<p>Enter name: <p>';
+		const textbox2 = document.createElement('input');
+		textbox2.type = "text";
+		textbox2.style = "font-size: 30px";
+		textbox2.title = "PlayerName";
+		textbox2.name = "PlayerName";
+		textbox2.id = "PlayerName";
+		rootElement.append(textbox2);
+		rootElement.innerHTML += '<br><br>';
+
 		rootElement.innerHTML += "<p> Length of game: </p>";
 		rootElement.innerHTML += '<input type="radio" id="short" name="length">'
 		rootElement.innerHTML += '<label for = "short">Short</label>';
@@ -84,8 +104,6 @@ function SplashScreen(rootElement) {
 		rootElement.innerHTML += ` <p>Play as:</p>`;
 		const playerIDs = ['0', '1'];
 		playerIDs.forEach(createButton);
-		//rootElement.innerHTML += '</div>';
-
 
 		document.getElementById("title").style.fontFamily = "Arial";
 		document.getElementById("title").style.fontSize = "75px";
@@ -337,7 +355,7 @@ class TestGameClient {
 			// Note that this move can be made ANYWHERE, not just in update(). It is here for now so it is automatically played.
 
 			//this.client.moves.GenerateMapWithValues(6, 6, 6, 6, ["PriorityName1", "PriorityName2"]);
-			this.client.moves.GenerateMapWithValues(boardSize, numRooms, numItems, numChars, ["PriorityName1", "PriorityName2"]);
+			this.client.moves.GenerateMapWithValues(boardSize, numRooms, numItems, numChars, [playerName]);
 			console.log("Map values set");
 
 			// More testing values
