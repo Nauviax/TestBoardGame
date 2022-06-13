@@ -64,6 +64,7 @@ function SplashScreen(rootElement) {
 		rootElement.innerHTML += '<p>Create or enter match id: <p>';
 		const textbox = document.createElement('input');
 		textbox.type = "text";
+		textbox.style = "font-size: 30px";
 		textbox.title = "MatchID";
 		textbox.name = "MatchID";
 		textbox.id = "MatchID";
