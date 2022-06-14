@@ -38,22 +38,22 @@ function SplashScreen(rootElement) {
 			button.id = "PlayerButton" + playerID;
 			button.textContent = 'Player ' + playerID;
 			button.onclick = () => {
-				if(document.getElementById('short').checked){
-					numChars = getRndInteger(3,5);
-					numRooms = getRndInteger(4,6);
-					numItems = getRndInteger(3,5);
+				if (document.getElementById('short').checked) {
+					numChars = getRndInteger(3, 5);
+					numRooms = getRndInteger(4, 6);
+					numItems = getRndInteger(3, 5);
 					boardSize = 6;
 				}
-				else if(document.getElementById('medium').checked){
-					numChars = getRndInteger(5,7);
-					numRooms = getRndInteger(6,8);
-					numItems = getRndInteger(5,7);
+				else if (document.getElementById('medium').checked) {
+					numChars = getRndInteger(5, 7);
+					numRooms = getRndInteger(6, 8);
+					numItems = getRndInteger(5, 7);
 					boardSize = 6;
 				}
-				else if(document.getElementById('long').checked){
-					numChars = getRndInteger(8,10);
-					numRooms = getRndInteger(9,11);
-					numItems = getRndInteger(8,10);
+				else if (document.getElementById('long').checked) {
+					numChars = getRndInteger(8, 10);
+					numRooms = getRndInteger(9, 11);
+					numItems = getRndInteger(8, 10);
 					boardSize = 8;
 				}
 				// if(playerID == 0){
@@ -136,8 +136,8 @@ function SplashScreen(rootElement) {
 }
 
 function getRndInteger(min, max) {
-	return Math.floor(Math.random() * (max - min) ) + min;
-  }
+	return Math.floor(Math.random() * (max - min)) + min;
+}
 
 // To launch this app, type 'npm start' into a console
 // And to run the server type 'npm run serve' in a second console
@@ -191,7 +191,9 @@ class TestGameClient {
 		document.getElementById("idNames").style.fontFamily = "Arial";
 		document.getElementById("idNames").style.fontSize = "30px";
 
-		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> <div class="diceButton" id="diceButton"></div> <div class="endButton" id="endButton"></div> <div class="askQuestionButton" id="askQuestionButton"></div> <div class="allOrNothingButton" id="allOrNothingButton"></div> </div></div>`;
+		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div></div> </div>`;
+		this.rootElement.innerHTML += `<div class="buttons"> <div class="diceButton" id="diceButton"></div> <div class="endButton" id="endButton"></div> <div class="askQuestionButton" id="askQuestionButton"></div> <div class="allOrNothingButton" id="allOrNothingButton"></div> </div> `
+		this.rootElement.innerHTML += `<div class="radioBox"> <p>Select 1 from each category before using question buttons<br></p> </div>`
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
 
@@ -213,20 +215,20 @@ class TestGameClient {
 		}
 
 		// Create and draw radioButtons for everything	
-		const rbRadio = this.rootElement.querySelector(".rbRadio"); // Get the rbRadio element
+		const radioBox = this.rootElement.querySelector(".radioBox");
 		const _labels = ["Characters", "Rooms", "Items"]; // Displayed labels
-		
+
 		for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
 			let htmlString = "";
 			htmlString += `<p><b>--${_labels[hh]}--</b></p>`;
 			for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
-				htmlString += `<p>${state.G._cardsInPlay[hh][ii]}: </p>`; // Write the name of each card next to the RadioButton
-				htmlString += `<input type="radio" name=${hh} id=${hh},${ii}></input>`; // Draw a RadioBttuon for each room in game
+				htmlString += `<p class="radioButton">${state.G._cardsInPlay[hh][ii]}: &nbsp </p>`; // Write the name of each card next to the RadioButton
+				htmlString += `<input type="radio" class="radioButton" name=${hh} id=${hh},${ii}></input>`; // Draw a RadioBttuon for each room in game
 				htmlString += ' <br/>'; // <br> to add a new line 
 			}
-			//Without this it doesnt draw but if I change it to rbRadio it deosnt draw either....
-			rbCheckbox.innerHTML += `<div class="innerRadio">${htmlString}</div>`; // <br> to add a new line 
+			radioBox.innerHTML += `<div class="innerRadio">${htmlString}</div>`;
 		}
+
 		//Set text for the end turn button
 		const endButton = document.getElementById("endButton");
 		endButton.textContent = "End Turn";
@@ -238,7 +240,7 @@ class TestGameClient {
 		//Set text for allOrNothing button
 		const allOrNothingButton = document.getElementById("allOrNothingButton");
 		allOrNothingButton.textContent = "All or Nothing";
-		
+
 
 		// Generate grass map (For board)
 		for (let ii = 0; ii < state.G._boardSize; ii++) {
@@ -299,13 +301,13 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DSP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DWP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DEP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
-	
+
 		//consts for getting the cards from the players hand
 		const listOfCards = [];
 		let playerCardsString = "";
 		//adds each category of card to the list of cards
-		for (let ii = 0; ii < state.G._startingInventories[this.client.playerID].length; ii++){
-			listOfCards.push(state.G._startingInventories[this.client.playerID][[ii], [ii], [ii]].toString());		
+		for (let ii = 0; ii < state.G._startingInventories[this.client.playerID].length; ii++) {
+			listOfCards.push(state.G._startingInventories[this.client.playerID][[ii], [ii], [ii]].toString());
 		}
 		//Adds each card to the card string
 		listOfCards.forEach(cards => {
@@ -314,7 +316,7 @@ class TestGameClient {
 		//splits the cards into individual elements
 		const playerCards = playerCardsString.split(",");
 		//Displays all of the cards to the screen
-		for (let jj = 0; jj < playerCards.length - 1; jj++){
+		for (let jj = 0; jj < playerCards.length - 1; jj++) {
 			this.rootElement.innerHTML += `<p class="playerCards">${playerCards[jj]}</p>`;
 		}
 
@@ -332,7 +334,7 @@ class TestGameClient {
 		const askQuestionButton = this.rootElement.querySelector('.askQuestionButton');
 		const allOrNothingButton = this.rootElement.querySelector('.allOrNothingButton');
 
-		
+
 		// This event handler will read the cell id from a cell’s `data-id` attribute and make the `clickCell` move.
 		const handleCellClick = event => {
 			let id = parseInt(event.target.dataset.id);
@@ -365,11 +367,11 @@ class TestGameClient {
 			//for loop 
 			var checkedvalues = [];
 			for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
-				
+
 				for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
 					const radio = document.getElementById(`${hh},${ii}`);
-					if (radio.checked){
-						checkedvalues[hh] = state.G._cardsInPlay[hh][ii];  
+					if (radio.checked) {
+						checkedvalues[hh] = state.G._cardsInPlay[hh][ii];
 						break;
 					}
 				}
@@ -380,12 +382,12 @@ class TestGameClient {
 			// console.log(curRoom);
 			// let curRoomName = state.G._cardsInPlay[1][curRoom]; // Get the current room name
 			// if (checkedvalues[1] == curRoomName){
-				this.client.moves.askPlayersQuestion(checkedvalues[0], checkedvalues[1], checkedvalues[2]);
+			this.client.moves.askPlayersQuestion(checkedvalues[0], checkedvalues[1], checkedvalues[2]);
 			// }
 			// else {
 			// 	console.log("not in right room");
 			// }
-			
+
 			//player such ans an item which os this 
 		}
 		const handleallOrNothingClick = event => { //handles the click event for the all or nothing button
@@ -393,19 +395,19 @@ class TestGameClient {
 			//for loop 
 			var checkedvalues = [];
 			for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
-				
+
 				for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
 					const radio = document.getElementById(`${hh},${ii}`);
-					if (radio.checked){
-						checkedvalues[hh] = state.G._cardsInPlay[hh][ii];  
+					if (radio.checked) {
+						checkedvalues[hh] = state.G._cardsInPlay[hh][ii];
 						break;
 					}
 				}
 			}
 			this.client.moves.allOrNothing(checkedvalues[0], checkedvalues[1], checkedvalues[2]);
 		}
-		
-		
+
+
 
 		diceButton.onclick = handleRollClick;
 		endButton.onclick = handleEndClick;
