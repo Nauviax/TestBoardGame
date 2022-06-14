@@ -277,6 +277,10 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CNE.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CSW.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CSE.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CINW.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CINE.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CISW.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
+		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Tiles/slides/CISE.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/IP0.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/IP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;

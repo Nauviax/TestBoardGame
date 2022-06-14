@@ -38,7 +38,6 @@ export const KiwiKluedo = {
 		winner: null, // Stores the winner of the game. Uses player index/id
 		losers: [], // Stores the losers of the game. List of true/false values, false if the player is still playing, true if they accused wrongly and are out.
 		querryOutput: [null, null, null], // Stores the output of the querry move, in format of [player, type(1,2,3), value] where type 1 reffers to character, type 2 reffers to room, and type 3 reffers to item
-		currentPlayer: null,
 	}),
 	name: 'KiwiKluedo',
 	moves: {
@@ -210,7 +209,7 @@ export const KiwiKluedo = {
 					first: (G, ctx) => 0,
 					next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
 				},
-				onBegin: (G, ctx) => { BeginTurn(G, ctx); G.currentPlayer = ctx.currentPlayer }, // Runs before each turn. Currently resets dice roll
+				onBegin: (G, ctx) => { BeginTurn(G, ctx); }, // Runs before each turn. Currently resets dice roll
 				endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out
 			},
 		},
