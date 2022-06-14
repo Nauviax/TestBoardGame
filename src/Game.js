@@ -136,8 +136,8 @@ export const KiwiKluedo = {
 				if (curRoomName == room) { // If the player is in the querried room,
 					let curIndex = (parseInt(ctx.currentPlayer) + 1) % ctx.numPlayers;
 					console.log("Checking player: " + curIndex);
-					 
-					
+
+
 					while (curIndex != ctx.currentPlayer) {
 						let output = QuerryPlayerInv(G, curIndex, character, room, item);
 						if (output[0] != 0) { // If the player has one of the querried items
@@ -210,7 +210,7 @@ export const KiwiKluedo = {
 					first: (G, ctx) => 0,
 					next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
 				},
-				onBegin: (G, ctx) => {BeginTurn(G, ctx); G.currentPlayer = ctx.currentPlayer}, // Runs before each turn. Currently resets dice roll
+				onBegin: (G, ctx) => { BeginTurn(G, ctx); G.currentPlayer = ctx.currentPlayer }, // Runs before each turn. Currently resets dice roll
 				endIf: (G, ctx) => { return G.losers[ctx.currentPlayer] }, // End the turn immediatly if this player is/becomes out
 			},
 		},
@@ -777,7 +777,7 @@ function SetRoom(RoomList, curIndex, GAMEMAP, xx, yy) { // Sets the current room
 
 function CellData(x, y, tile = null) { // Stores the possible tiles for a cell, the location of this cell, and a reference to the cells around itself (To be filled in later, not in constructor)
 	this.tile = tile; // Will contain an id, sides for placement, a weight, and a 3x3 array of empty/wall/door etc
-	this.tileList = [outside, roomLargeA1, roomLargeA2, roomLargeA3, roomLargeA4, roomMediumB1, roomMediumB2, roomMediumC1, roomMediumC2, roomSmallD1, roomSmallE1, roomSmallF1];
+	this.tileList = [outside, roomLargeA1, roomLargeA2, roomLargeA3, roomLargeA4, roomMediumB1, roomMediumB2, roomMediumC1, roomMediumC2, roomSmallD1, roomSmallE1, roomSmallF1, roomLargeG1, roomLargeG2, roomLargeG3, roomLargeG4, roomLargeH1, roomLargeH2, roomLargeH3, roomLargeH4];
 	this.x = x;
 	this.y = y;
 	this.roomID = null;
@@ -797,25 +797,25 @@ const outside = { // Generic tile
 const roomLargeA1 = { // A large 2x2 room. Starting top left, then reading order.
 	id: 'a',
 	sides: ["0r", "at", "al", "0r"], // "at" as in a, top join. "al" as in a, left join etc.
-	weight: 60,
+	weight: 100,
 	walls: [['CSE', 'DE', 'WE'], ['WS', 'I', 'I'], ['WS', 'I', 'I']]
 };
 const roomLargeA2 = {
 	id: 'a',
 	sides: ["0r", "0r", "ar", "at"],
-	weight: 60,
+	weight: 100,
 	walls: [['WS', 'I', 'I'], ['DS', 'I', 'I'], ['CSW', 'WW', 'WW']]
 };
 const roomLargeA3 = {
 	id: 'a',
 	sides: ["al", "ab", "0r", "0r"],
-	weight: 60,
+	weight: 100,
 	walls: [['WE', 'WE', 'CNE'], ['I', 'I', 'DN'], ['I', 'I', 'WN']]
 };
 const roomLargeA4 = {
 	id: 'a',
 	sides: ["ar", "0r", "0r", "ab"],
-	weight: 60,
+	weight: 100,
 	walls: [['I', 'I', 'WN'], ['I', 'I', 'WN'], ['WW', 'DW', 'CNW']]
 };
 
@@ -848,23 +848,70 @@ const roomMediumC2 = {
 const roomSmallD1 = { // A small 1x1 room. Small rooms differ only by door placement
 	id: 'd',
 	sides: ["0r", "0r", "0r", "0r"],
-	weight: 100,
+	weight: 60,
 	walls: [['CSE', 'DE', 'CNE'], ['DS', 'I', 'WN'], ['CSW', 'WW', 'CNW']]
 };
 
 const roomSmallE1 = { // A small 1x1 room.
 	id: 'e',
 	sides: ["0r", "0r", "0r", "0r"],
-	weight: 100,
+	weight: 60,
 	walls: [['CSE', 'WE', 'CNE'], ['WS', 'I', 'DN'], ['CSW', 'DW', 'CNW']]
 };
 
 const roomSmallF1 = { // A small 1x1 room.
 	id: 'f',
 	sides: ["0r", "0r", "0r", "0r"],
-	weight: 100,
+	weight: 60,
 	walls: [['CSE', 'DE', 'CNE'], ['WS', 'I', 'WN'], ['CSW', 'DW', 'CNW']]
 };
 
-// Some constant lists for checking if a tile is in a certian category
-const rooms = [roomLargeA1, roomLargeA2, roomLargeA3, roomLargeA4, roomMediumB1, roomMediumB2, roomMediumC1, roomMediumC2, roomSmallD1, roomSmallE1, roomSmallF1]; // A list of all tiles that are considered a room
+const roomLargeG1 = { // A large 3x2 room, no "bottom corners" (Think Tetris "T" piece)
+	id: 'g',
+	sides: ["0r", "gl", "0r", "0r"],
+	weight: 100,
+	walls: [['CSE', 'DE', 'CNE'], ['WS', 'I', 'WN'], ['WS', 'I', 'WN']]
+}
+const roomLargeG2 = {
+	id: 'g',
+	sides: ["0r", "gr", "gb", "gl"],
+	weight: 100,
+	walls: [['WS', 'I', 'CINE'], ['DS', 'I', 'I'], ['WS', 'I', 'CINW']]
+}
+const roomLargeG3 = {
+	id: 'g',
+	sides: ["0r", "0r", "0r", "gr"],
+	weight: 100,
+	walls: [['WS', 'I', 'WN'], ['WS', 'I', 'WN'], ['CSW', 'DW', 'CNW']]
+}
+const roomLargeG4 = {
+	id: 'g',
+	sides: ["gb", "0r", "0r", "0r"],
+	weight: 100,
+	walls: [['WE', 'DE', 'CNE'], ['I', 'I', 'WN'], ['WW', 'DW', 'CNW']]
+}
+
+const roomLargeH1 = { // A large 2x3 room, no top left and bottom right corners (Think Tetris again)
+	id: 'h',
+	sides: ["0r", "0r", "ht", "0r"],
+	weight: 80, // 80 as seems to appear more often anyway
+	walls: [['CSE', 'DE', 'WE'], ['WS', 'I', 'I'], ['CSW', 'WW', 'WW']]
+}
+const roomLargeH2 = {
+	id: 'h',
+	sides: ["0r", "hm", "hb", "0r"],
+	weight: 80,
+	walls: [['CSE', 'DE', 'WE'], ['WS', 'I', 'I'], ['WS', 'I', 'CINW']]
+}
+const roomLargeH3 = {
+	id: 'h',
+	sides: ["ht", "0r", "0r", "hm"],
+	weight: 80,
+	walls: [['CISE', 'I', 'WN'], ['I', 'I', 'WN'], ['WW', 'DW', 'CNW']]
+}
+const roomLargeH4 = {
+	id: 'h',
+	sides: ["hb", "0r", "0r", "0r"],
+	weight: 80,
+	walls: [['WE', 'WE', 'CNE'], ['I', 'I', 'WN'], ['WW', 'DW', 'CNW']]
+}
