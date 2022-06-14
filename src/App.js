@@ -191,7 +191,7 @@ class TestGameClient {
 		document.getElementById("idNames").style.fontFamily = "Arial";
 		document.getElementById("idNames").style.fontSize = "30px";
 
-		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> <div class="diceButton" id="diceButton"></div> <div class="endButton" id="endButton"></div> </div></div>`;
+		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div> <div class="diceButton" id="diceButton"></div> <div class="endButton" id="endButton"></div> <div class="askQuestionButton" id="askQuestionButton"></div> <div class="allOrNothingButton" id="allOrNothingButton"></div> </div></div>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
 
@@ -212,10 +212,33 @@ class TestGameClient {
 			rbCheckbox.innerHTML += `<div class="innerCheckbox">${htmlString}</div>`; // <br> to add a new line 
 		}
 
+		// Create and draw radioButtons for everything	
+		const rbRadio = this.rootElement.querySelector(".rbRadio"); // Get the rbRadio element
+		const _labels = ["Characters", "Rooms", "Items"]; // Displayed labels
+		
+		for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
+			let htmlString = "";
+			htmlString += `<p><b>--${_labels[hh]}--</b></p>`;
+			for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
+				htmlString += `<p>${state.G._cardsInPlay[hh][ii]}: </p>`; // Write the name of each card next to the RadioButton
+				htmlString += `<input type="radio" name=${hh} id=${hh},${ii}></input>`; // Draw a RadioBttuon for each room in game
+				htmlString += ' <br/>'; // <br> to add a new line 
+			}
+			//Without this it doesnt draw but if I change it to rbRadio it deosnt draw either....
+			rbCheckbox.innerHTML += `<div class="innerRadio">${htmlString}</div>`; // <br> to add a new line 
+		}
 		//Set text for the end turn button
 		const endButton = document.getElementById("endButton");
 		endButton.textContent = "End Turn";
 
+		//Set text for askPlayerQueston button 
+		const askQuestionButton = document.getElementById("askQuestionButton");
+		askQuestionButton.textContent = "Ask A Question";
+
+		//Set text for allOrNothing button
+		const allOrNothingButton = document.getElementById("allOrNothingButton");
+		allOrNothingButton.textContent = "All or Nothing";
+		
 
 		// Generate grass map (For board)
 		for (let ii = 0; ii < state.G._boardSize; ii++) {
@@ -299,14 +322,17 @@ class TestGameClient {
 
 	}
 
-	attachListeners() {
+	attachListeners(state) {
 		console.log("Attaching listeners");
 		// Attach the evenit listener to each of the board cells.
 		const cells = this.rootElement.querySelectorAll('.cell');
 		// Ditto for buttons
 		const diceButton = this.rootElement.querySelector('.diceButton');
 		const endButton = this.rootElement.querySelector('.endButton');
+		const askQuestionButton = this.rootElement.querySelector('.askQuestionButton');
+		const allOrNothingButton = this.rootElement.querySelector('.allOrNothingButton');
 
+		
 		// This event handler will read the cell id from a cell’s `data-id` attribute and make the `clickCell` move.
 		const handleCellClick = event => {
 			let id = parseInt(event.target.dataset.id);
@@ -329,14 +355,62 @@ class TestGameClient {
 			console.log("Rolled dice");
 			this.client.moves.rollDice();
 		}
-		//Hnadles the end button click
+		//Handles the end button click
 		const handleEndClick = event => {
 			console.log("Ended Turn");
 			this.client.events.endTurn();
 		}
+		const handleaskQuestionClick = event => { //handles the click event for the ask question button
+			console.log("Asked Question");
+			//for loop 
+			var checkedvalues = [];
+			for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
+				
+				for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
+					const radio = document.getElementById(`${hh},${ii}`);
+					if (radio.checked){
+						checkedvalues[hh] = state.G._cardsInPlay[hh][ii];  
+						break;
+					}
+				}
+			}
+			// console.log(state.G.playerLocations);
+			// console.log(state.G.currentPlayer);
+			// let curRoom = state.G.playerLocations[state.G.currentPlayer][3]; // Get the current room index
+			// console.log(curRoom);
+			// let curRoomName = state.G._cardsInPlay[1][curRoom]; // Get the current room name
+			// if (checkedvalues[1] == curRoomName){
+				this.client.moves.askPlayersQuestion(checkedvalues[0], checkedvalues[1], checkedvalues[2]);
+			// }
+			// else {
+			// 	console.log("not in right room");
+			// }
+			
+			//player such ans an item which os this 
+		}
+		const handleallOrNothingClick = event => { //handles the click event for the all or nothing button
+			console.log("All or Nothing question asked");
+			//for loop 
+			var checkedvalues = [];
+			for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
+				
+				for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
+					const radio = document.getElementById(`${hh},${ii}`);
+					if (radio.checked){
+						checkedvalues[hh] = state.G._cardsInPlay[hh][ii];  
+						break;
+					}
+				}
+			}
+			this.client.moves.allOrNothing(checkedvalues[0], checkedvalues[1], checkedvalues[2]);
+		}
+		
+		
 
 		diceButton.onclick = handleRollClick;
 		endButton.onclick = handleEndClick;
+		askQuestionButton.onclick = handleaskQuestionClick;
+		allOrNothingButton.onclick = handleallOrNothingClick;
 	}
 
 
@@ -369,7 +443,7 @@ class TestGameClient {
 		if (!initialMapGenerated) { // Create cells on the screen on first update
 			console.log("Initial map generation");
 			this.createBoard(state);
-			this.attachListeners();
+			this.attachListeners(state);
 			initialMapGenerated = true;
 			return; // Try not to delete this return line, it prevents crashes.
 		}
