@@ -10,9 +10,8 @@ var numChars = 0;
 var numItems = 0;
 var numRooms = 0;
 var boardSize = 0;
-var playerName1 = "Player 1";
-var playerName2 = "Player 2";
-var playerName = "Player 1";
+var updateCounter = 2; // Fix for checkboxes not being accurate (DON'T CHANGE)
+var playerName = "DefaultName";
 
 //For use IF we want to use the lobby to manage matches
 async function lobbyStart() {
@@ -193,41 +192,14 @@ class TestGameClient {
 
 		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div></div> </div>`;
 		this.rootElement.innerHTML += `<div class="buttons"> <div class="diceButton" id="diceButton"></div> <div class="endButton" id="endButton"></div> <div class="askQuestionButton" id="askQuestionButton"></div> <div class="allOrNothingButton" id="allOrNothingButton"></div> </div> `
-		this.rootElement.innerHTML += `<div class="radioBox"> <p>Select 1 from each category before using question buttons<br></p> </div>`
+		this.rootElement.innerHTML += `<div class="radioBox"></div>`;
+		this.rootElement.innerHTML += `<div class="cards"></div>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
 
-		// Create and draw checkboxs for everything	
-		const rbCheckbox = this.rootElement.querySelector(".rbCheckbox"); // Get the rbCheckbox element
-		const labels = ["Characters", "Rooms", "Items"]; // Displayed labels
-		for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
-			let htmlString = "";
-			htmlString += `<p><b>--${labels[hh]}--</b></p>`;
-			for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
-				htmlString += `<p>${state.G._cardsInPlay[hh][ii]}: </p>`; // Write the name of each card next to the checkbox
-				// Player for loop
-				for (let jj = 0; jj < state.ctx.numPlayers; jj++) { // For each player on the board,
-					htmlString += `<input type="checkbox" id=${jj}>P${jj}</input>`; // Draw a checkbox for each room in game
-				}
-				htmlString += ' <br/>'; // <br> to add a new line 
-			}
-			rbCheckbox.innerHTML += `<div class="innerCheckbox">${htmlString}</div>`; // <br> to add a new line 
-		}
+		// Checkbox drawing code moved to update() due to _cardsInPlay changing? Consistently on the second game update, only the first player who joins has this problem
 
-		// Create and draw radioButtons for everything	
-		const radioBox = this.rootElement.querySelector(".radioBox");
-		const _labels = ["Characters", "Rooms", "Items"]; // Displayed labels
-
-		for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
-			let htmlString = "";
-			htmlString += `<p><b>--${_labels[hh]}--</b></p>`;
-			for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
-				htmlString += `<p class="radioButton">${state.G._cardsInPlay[hh][ii]}: &nbsp </p>`; // Write the name of each card next to the RadioButton
-				htmlString += `<input type="radio" class="radioButton" name=${hh} id=${hh},${ii}></input>`; // Draw a RadioBttuon for each room in game
-				htmlString += ' <br/>'; // <br> to add a new line 
-			}
-			radioBox.innerHTML += `<div class="innerRadio">${htmlString}</div>`;
-		}
+		// The radio buttons too
 
 		//Set text for the end turn button
 		const endButton = document.getElementById("endButton");
@@ -306,23 +278,7 @@ class TestGameClient {
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DWP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 		this.rootElement.innerHTML += `<img src='https://nauviax.jalbum.net/Player/slides/DEP1.jpg' style='width: 0px; height: 0px; object-fit; fill;'/>`;
 
-		//consts for getting the cards from the players hand
-		const listOfCards = [];
-		let playerCardsString = "";
-		//adds each category of card to the list of cards
-		for (let ii = 0; ii < state.G._startingInventories[this.client.playerID].length; ii++) {
-			listOfCards.push(state.G._startingInventories[this.client.playerID][[ii], [ii], [ii]].toString());
-		}
-		//Adds each card to the card string
-		listOfCards.forEach(cards => {
-			playerCardsString += cards + ", ";
-		});
-		//splits the cards into individual elements
-		const playerCards = playerCardsString.split(",");
-		//Displays all of the cards to the screen
-		for (let jj = 0; jj < playerCards.length - 1; jj++) {
-			this.rootElement.innerHTML += `<p class="playerCards">${playerCards[jj]}</p>`;
-		}
+		// Card drawing also moved to update()
 
 		document.querySelectorAll('p').forEach(e => e.style.fontFamily = "Arial");
 
@@ -470,6 +426,63 @@ class TestGameClient {
 			}
 			else {
 				diceButton.textContent = "Roll Dice!";
+			}
+
+			if (updateCounter > 0) // Create and draw checkboxs (AND MORE NOW) for everything (Only runs twice. Because state doesn't seem to be accurate until after the second update)
+			{
+				const rbCheckbox = this.rootElement.querySelector(".rbCheckbox"); // Get the rbCheckbox element
+				rbCheckbox.innerHTML = ""; // Clear the rbCheckbox element
+				const labels = ["Characters", "Rooms", "Items"]; // Displayed labels
+				for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
+					let htmlString = "";
+					htmlString += `<p><b>--${labels[hh]}--</b></p>`;
+					for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
+						htmlString += `<p>${state.G._cardsInPlay[hh][ii]}: </p>`; // Write the name of each card next to the checkbox
+						// Player for loop
+						for (let jj = 0; jj < state.ctx.numPlayers; jj++) { // For each player on the board,
+							htmlString += `<input type="checkbox" id=${jj}>P${jj}</input>`; // Draw a checkbox for each room in game
+						}
+						htmlString += ' <br/>'; // <br> to add a new line 
+					}
+					rbCheckbox.innerHTML += `<div class="innerCheckbox">${htmlString}</div>`; // <br> to add a new line 
+				}
+
+				// Create and draw radioButtons for everything
+				const radioBox = this.rootElement.querySelector(".radioBox");
+				radioBox.innerHTML = `<p>Select 1 from each category before using question buttons<br></p>`; // Reset the element
+				const _labels = ["Characters", "Rooms", "Items"]; // Displayed labels
+
+				for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
+					let htmlString = "";
+					htmlString += `<p><b>--${_labels[hh]}--</b></p>`;
+					for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
+						htmlString += `<p class="radioButton">${state.G._cardsInPlay[hh][ii]}: &nbsp </p>`; // Write the name of each card next to the RadioButton
+						htmlString += `<input type="radio" class="radioButton" name=${hh} id=${hh},${ii}></input>`; // Draw a RadioBttuon for each room in game
+						htmlString += ' <br/>'; // <br> to add a new line 
+					}
+					radioBox.innerHTML += `<div class="innerRadio">${htmlString}</div>`;
+				}
+				// Draw cards
+				// Consts for getting the cards from the players hand
+				const cardElement = this.rootElement.querySelector(".cards");
+				cardElement.innerHTML = ''; // Reset the element
+				const listOfCards = [];
+				let playerCardsString = "";
+				// Adds each category of card to the list of cards
+				for (let ii = 0; ii < state.G._startingInventories[this.client.playerID].length; ii++) {
+					listOfCards.push(state.G._startingInventories[this.client.playerID][[ii], [ii], [ii]].toString());
+				}
+				// Adds each card to the card string
+				listOfCards.forEach(cards => {
+					playerCardsString += cards + ", ";
+				});
+				// Splits the cards into individual elements
+				const playerCards = playerCardsString.split(",");
+				// Displays all of the cards to the screen
+				for (let jj = 0; jj < playerCards.length - 1; jj++) {
+					cardElement.innerHTML += `<p class="playerCards">${playerCards[jj]}</p>`;
+				}
+				updateCounter--;
 			}
 
 			// Get all the board cells.
