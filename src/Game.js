@@ -258,6 +258,10 @@ function DealInventories(G, ctx) { // Deals the inventories of each player, and 
 	while (roomNames.length > G._roomNum) {
 		roomNames.shift();
 	}
+	// Shuffle again so it's not always the first card of each type
+	charNames = Shuffle(charNames);
+	roomNames = Shuffle(roomNames);
+	itemNames = Shuffle(itemNames);
 	// These cards will all be used in the game. Save copies of them to the game state.
 	for (let ii = 0; ii < charNamesPriority.length; ii++) { // Add priority names to the game state
 		charNames.push(charNamesPriority[ii]); // Side effect of forcing min charNum to be the same as player count (Which is fine)
