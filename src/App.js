@@ -358,7 +358,7 @@ class TestGameClient {
 			console.log("Asked Question");
 			//for loop 
 			var checkedvalues = [];
-			for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
+			for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) { 
 				for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
 					const radio = document.getElementById(`${hh},${ii}`);
 					if (radio.checked) {
@@ -367,7 +367,19 @@ class TestGameClient {
 					}
 				}
 			}
+			console.log(checkedvalues);
 			this.client.moves.askPlayersQuestion(checkedvalues[0], checkedvalues[1], checkedvalues[2]);
+
+			let querryOutput = state.G.querryOutput;
+			if (querryOutput[1] == 0 || querryOutput[0] == null){
+				console.log("no card found");
+				window.alert("no card found");
+			}
+			else{
+				console.log("player "  + querryOutput[0] + " has the card " + querryOutput[2]);
+				window.alert("player "  + querryOutput[0] + " has the card " + querryOutput[2]);
+			}
+			
 		}
 		const handleallOrNothingClick = event => { //handles the click event for the all or nothing button
 			console.log("All or Nothing question asked");

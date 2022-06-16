@@ -125,18 +125,21 @@ export const KiwiKluedo = {
 			},
 		},
 		askPlayersQuestion: { // Querry output should be read from state after making this move, and shown to the player visually. No backend code is implemented to show the player anything.
+			
 			move: (G, ctx, character, room, item,) => {
+				console.log(room);
 				if (!G.playerLocations[ctx.currentPlayer][2]) { // If player is not even in a room
 					console.log('Player is not in a room');
 					return INVALID_MOVE; // Bad player, bad
 				}
 				let curRoom = G.playerLocations[ctx.currentPlayer][3]; // Get the current room index
 				let curRoomName = G._cardsInPlay[1][curRoom]; // Get the current room name
+				console.log(room);
+				console.log(curRoomName);
 				if (curRoomName == room) { // If the player is in the querried room,
 					let curIndex = (parseInt(ctx.currentPlayer) + 1) % ctx.numPlayers;
 					console.log("Checking player: " + curIndex);
-
-
+					
 					while (curIndex != ctx.currentPlayer) {
 						let output = QuerryPlayerInv(G, curIndex, character, room, item);
 						if (output[0] != 0) { // If the player has one of the querried items
