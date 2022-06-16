@@ -34,26 +34,30 @@ function SplashScreen(rootElement) {
 
 		// method to create buttons for each player, and sets click event to return playerId and matchId
 		const createButton = (playerID) => {
+			// create button with its properties
 			const button = document.createElement('button');
-			button.id = "PlayerButton" + playerID;
+			button.id = "PlayerButton" + (parseInt(playerID) + 1);
 			button.class = "playerbutton";
-			button.textContent = 'Player ' + playerID;
+			button.textContent = 'Player ' + (parseInt(playerID) + 1);
 
+			// style the button
 			button.style.padding = "16px 32px";
 			button.style.margin = "5px";
 			button.style.backgroundColor = "seagreen";
 			button.style.color = "#EFE8D8";
 			button.style.cursor = "pointer";
 			button.style.border = "none";
-			button.style.fontSize = "20px";
+			button.style.fontSize = "30px";
 			button.style.fontFamily = "Arial";
 
+			// click event which reads the splash screen information
 			button.onclick = () => {
 				if(playerID == 0){
 					var select = document.getElementById('players');
 					players = parseInt(select.options[select.selectedIndex].value);
 				}
 				
+				// sets game length dependent variables
 				if (document.getElementById('short').checked) {
 					numChars = getRndInteger(3, 5);
 					numRooms = getRndInteger(4, 6);
@@ -72,10 +76,12 @@ function SplashScreen(rootElement) {
 					numItems = getRndInteger(8, 10);
 					boardSize = 8;
 				}
+				// gets players name
 				playerName = document.getElementById('PlayerName').value;
 				if(playerName == ""){
-					playerName = "Player 0";
+					playerName = "Player 1";
 				}
+				// sets return items
 				const matchID = document.getElementById('MatchID').value;
 				const returnValue = [playerID, matchID];
 				resolve(returnValue)
@@ -83,7 +89,13 @@ function SplashScreen(rootElement) {
 			rootElement.append(button);
 		};
 
+		// adds and formats title
 		rootElement.innerHTML = '<h1 id="title">Kiwi Kluedo</h1>';
+		document.getElementById("title").style.fontFamily = "Arial";
+		document.getElementById("title").style.fontSize = "75px";
+		document.getElementById("title").style.color = "seagreen";
+
+		// adds and formats match id textbox
 		rootElement.innerHTML += '<p>Create or enter match id: <p>';
 		const textbox = document.createElement('input');
 		textbox.type = "text";
@@ -91,10 +103,10 @@ function SplashScreen(rootElement) {
 		textbox.title = "MatchID";
 		textbox.name = "MatchID";
 		textbox.id = "MatchID";
-		//rootElement.innerHTML += '<div id="lobby">';
 		rootElement.append(textbox);
 		rootElement.innerHTML += '<br><br>';
 
+		// adds and formats player name textbox
 		rootElement.innerHTML += '<p>Enter name: <p>';
 		const textbox2 = document.createElement('input');
 		textbox2.type = "text";
@@ -105,6 +117,7 @@ function SplashScreen(rootElement) {
 		rootElement.append(textbox2);
 		rootElement.innerHTML += '<br><br>';
 
+		// adds and formats length of game radio buttons
 		rootElement.innerHTML += "<p> Length of game: </p>";
 		rootElement.innerHTML += '<input type="radio" id="short" name="length">'
 		rootElement.innerHTML += '<label for = "short">Short</label>';
@@ -114,53 +127,30 @@ function SplashScreen(rootElement) {
 		rootElement.innerHTML += '<label for = "long">Long</label>';
 		rootElement.innerHTML += '<br><br>';
 
-		rootElement.innerHTML += "<p> Number of players: </p>";
-		rootElement.innerHTML += "<select name='players' id='players'><option value='2'>2</option><option value='3'>3</option><option value='4'>4</option><option value='5'>5</option><option value='6'>6</option>";
-		rootElement.innerHTML += "</select>";
+		// adds and formats number of players dropdown
+		rootElement.innerHTML += "<p> Number of players: <select name='players' id='players'><option value='2'>2</option><option value='3'>3</option><option value='4'>4</option><option value='5'>5</option><option value='6'>6</option>";
+		//rootElement.innerHTML += "<select name='players' id='players'><option value='2'>2</option><option value='3'>3</option><option value='4'>4</option><option value='5'>5</option><option value='6'>6</option>";
+		rootElement.innerHTML += "</select></p><br>";
+		document.getElementById('players').style.fontSize = "30px";
+		document.querySelectorAll('option').forEach(e => e.style.fontSize = "30px");
+		document.querySelectorAll('option').forEach(e => e.style.fontFamily = "Arial");
 
+		// creates player buttons
 		rootElement.innerHTML += ` <p>Play as:</p>`;
 		const playerIDs = ['0', '1', '2', '3', '4', '5'];
 		playerIDs.forEach(createButton);
 
-		document.getElementById("title").style.fontFamily = "Arial";
-		document.getElementById("title").style.fontSize = "75px";
-		document.getElementById("title").style.color = "seagreen";
-
-		// document.getElementById("PlayerButton0").style.padding = "16px 32px";
-		// document.getElementById("PlayerButton0").style.margin = "5px";
-		// document.getElementById("PlayerButton0").style.backgroundColor = "seagreen";
-		// document.getElementById("PlayerButton0").style.color = "#EFE8D8";
-		// document.getElementById("PlayerButton0").style.cursor = "pointer";
-		// document.getElementById("PlayerButton0").style.border = "none";
-		// document.getElementById("PlayerButton0").style.fontSize = "16px"
-
-		// document.getElementById("PlayerButton1").style.padding = "16px 32px";
-		// document.getElementById("PlayerButton1").style.margin = "5px";
-		// document.getElementById("PlayerButton1").style.backgroundColor = "seagreen";
-		// document.getElementById("PlayerButton1").style.color = "#EFE8D8";
-		// document.getElementById("PlayerButton1").style.cursor = "pointer";
-		// document.getElementById("PlayerButton1").style.border = "none";
-		// document.getElementById("PlayerButton1").style.fontSize = "16px";
-
-		// document.querySelectorAll('PlayerButton').forEach(e => e.style.backgroundColor = "seagreen");
-
-		// const boxes = document.querySelectorAll('.playerbutton');
-		// boxes.forEach(box => {
-		// 	box.style.backgroundColor = "seagreen";
-		// 	box.style.padding = "16px 32px";
-		// 	console.log(box);
-		// });
-
+		// basic formatting
 		document.querySelectorAll('p').forEach(e => e.style.fontFamily = "Arial");
 		document.querySelectorAll('label').forEach(e => e.style.fontFamily = "Arial");
 		document.querySelectorAll('p').forEach(e => e.style.fontSize = "30px");
 		document.querySelectorAll('label').forEach(e => e.style.fontSize = "30px");
-
 		document.body.style.backgroundColor = "#EFE8D8";
 
 	});
 }
 
+// Function which returns a random between between inclusive min and exclusive max
 function getRndInteger(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -215,16 +205,29 @@ class TestGameClient {
 		// Add the HTML to our app <div>.
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
 		//this.rootElement.innerHTML = `<h2 style="font-family: Arial;font-size: 30px">MatchID: ${this.client.matchID} --> Player ${this.client.playerID} </h2>`;
-		this.rootElement.innerHTML = `<h2 id='idNames'>MatchID: ${this.client.matchID} --> Player ${this.client.playerID} </h2>`;
+		this.rootElement.innerHTML = `<h2 id='idNames'>MatchID: ${this.client.matchID} --> Player ${parseInt(this.client.playerID)+1} </h2>`;
 		document.getElementById("idNames").style.fontFamily = "Arial";
 		document.getElementById("idNames").style.fontSize = "30px";
 
 		this.rootElement.innerHTML += `<div> <table cellspacing="0" class="cellTable">${rows.join('')}</table> <div class="beInline"> <p class="minimap"></p> <div class="rbCheckbox"></div></div> </div>`;
-		this.rootElement.innerHTML += `<div class="buttons"> <div class="diceButton" id="diceButton"></div> <div class="endButton" id="endButton"></div> <div class="askQuestionButton" id="askQuestionButton"></div> <div class="allOrNothingButton" id="allOrNothingButton"></div> </div> `
+		this.rootElement.innerHTML += `<div class="buttons"> <div class="diceButton" id="diceButton"></div> <div class="askQuestionButton" id="askQuestionButton"></div> <div class="allOrNothingButton" id="allOrNothingButton"></div> <div class="endButton" id="endButton"></div> </div> `
 		this.rootElement.innerHTML += `<div class="radioBox"></div>`;
 		this.rootElement.innerHTML += `<div class="cards"></div>`;
 		this.rootElement.innerHTML += `<p class="winner"></p>`;
 
+		// format the buttons
+		document.getElementById('diceButton').style.fontFamily = 'Arial';
+		document.getElementById('diceButton').style.textAlign = 'center';
+		document.getElementById('diceButton').style.fontSize = '20px';
+		document.getElementById('askQuestionButton').style.fontFamily = 'Arial';
+		document.getElementById('askQuestionButton').style.textAlign = 'center';
+		document.getElementById('askQuestionButton').style.fontSize = '20px';
+		document.getElementById('allOrNothingButton').style.fontFamily = 'Arial';
+		document.getElementById('allOrNothingButton').style.textAlign = 'center';
+		document.getElementById('allOrNothingButton').style.fontSize = '20px';
+		document.getElementById('endButton').style.fontFamily = 'Arial';
+		document.getElementById('endButton').style.textAlign = 'center';
+		document.getElementById('endButton').style.fontSize = '20px';
 
 		// Checkbox drawing code moved to update() due to _cardsInPlay changing? Consistently on the second game update, only the first player who joins has this problem
 
@@ -512,6 +515,9 @@ class TestGameClient {
 					cardElement.innerHTML += `<p class="playerCards">${playerCards[jj]}</p>`;
 				}
 				updateCounter--;
+
+				document.querySelectorAll('p').forEach(e => e.style.fontFamily = "Arial");
+				document.querySelectorAll('p').forEach(e => e.style.fontSize = "18px");
 			}
 
 			// Get all the board cells.
