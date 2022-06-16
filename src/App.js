@@ -1,7 +1,7 @@
 import { Client } from 'boardgame.io/client';
 import { KiwiKluedo } from './Game';
 import { SocketIO } from 'boardgame.io/multiplayer';
-import { LobbyClient } from 'boardgame.io/client';
+//import { LobbyClient } from 'boardgame.io/client';
 
 var initialMapGenerated = false;
 var grassMap = []; // Used to hold grass variations. Don't worry if you aren't messing with images on the board
@@ -12,17 +12,18 @@ var numRooms = 0;
 var boardSize = 0;
 var updateCounter = 2; // Fix for checkboxes not being accurate (DON'T CHANGE)
 var playerName = "DefaultName";
+var players = 2;
 
 //For use IF we want to use the lobby to manage matches
-async function lobbyStart() {
-	const lobbyClient = new LobbyClient({ server: 'http://localhost:8088' });
-	const { matchID } = await lobbyClient.createMatch('KiwiKluedo', {
-		numPlayers: 2
-	});
-	console.log("Generated MatchID");
-	console.log(matchID);
-	return matchID;
-}
+// async function lobbyStart() {
+// 	const lobbyClient = new LobbyClient({ server: 'http://localhost:8088' });
+// 	const { matchID } = await lobbyClient.createMatch('KiwiKluedo', {
+// 		numPlayers: 2
+// 	});
+// 	console.log("Generated MatchID");
+// 	console.log(matchID);
+// 	return matchID;
+// }
 
 // function for the start page of the game, passing in the page element 
 function SplashScreen(rootElement) {
@@ -35,8 +36,24 @@ function SplashScreen(rootElement) {
 		const createButton = (playerID) => {
 			const button = document.createElement('button');
 			button.id = "PlayerButton" + playerID;
+			button.class = "playerbutton";
 			button.textContent = 'Player ' + playerID;
+
+			button.style.padding = "16px 32px";
+			button.style.margin = "5px";
+			button.style.backgroundColor = "seagreen";
+			button.style.color = "#EFE8D8";
+			button.style.cursor = "pointer";
+			button.style.border = "none";
+			button.style.fontSize = "20px";
+			button.style.fontFamily = "Arial";
+
 			button.onclick = () => {
+				if(playerID == 0){
+					var select = document.getElementById('players');
+					players = parseInt(select.options[select.selectedIndex].value);
+				}
+				
 				if (document.getElementById('short').checked) {
 					numChars = getRndInteger(3, 5);
 					numRooms = getRndInteger(4, 6);
@@ -55,13 +72,10 @@ function SplashScreen(rootElement) {
 					numItems = getRndInteger(8, 10);
 					boardSize = 8;
 				}
-				// if(playerID == 0){
-				// 	playerName1 = document.getElementById('PlayerName').value;
-				// }
-				// else if(playerID == 1){
-				// 	playerName2 = document.getElementById('PlayerName').value;
-				// }
 				playerName = document.getElementById('PlayerName').value;
+				if(playerName == ""){
+					playerName = "Player 0";
+				}
 				const matchID = document.getElementById('MatchID').value;
 				const returnValue = [playerID, matchID];
 				resolve(returnValue)
@@ -100,29 +114,42 @@ function SplashScreen(rootElement) {
 		rootElement.innerHTML += '<label for = "long">Long</label>';
 		rootElement.innerHTML += '<br><br>';
 
+		rootElement.innerHTML += "<p> Number of players: </p>";
+		rootElement.innerHTML += "<select name='players' id='players'><option value='2'>2</option><option value='3'>3</option><option value='4'>4</option><option value='5'>5</option><option value='6'>6</option>";
+		rootElement.innerHTML += "</select>";
+
 		rootElement.innerHTML += ` <p>Play as:</p>`;
-		const playerIDs = ['0', '1'];
+		const playerIDs = ['0', '1', '2', '3', '4', '5'];
 		playerIDs.forEach(createButton);
 
 		document.getElementById("title").style.fontFamily = "Arial";
 		document.getElementById("title").style.fontSize = "75px";
 		document.getElementById("title").style.color = "seagreen";
 
-		document.getElementById("PlayerButton0").style.padding = "16px 32px";
-		document.getElementById("PlayerButton0").style.margin = "5px";
-		document.getElementById("PlayerButton0").style.backgroundColor = "seagreen";
-		document.getElementById("PlayerButton0").style.color = "#EFE8D8";
-		document.getElementById("PlayerButton0").style.cursor = "pointer";
-		document.getElementById("PlayerButton0").style.border = "none";
-		document.getElementById("PlayerButton0").style.fontSize = "16px"
+		// document.getElementById("PlayerButton0").style.padding = "16px 32px";
+		// document.getElementById("PlayerButton0").style.margin = "5px";
+		// document.getElementById("PlayerButton0").style.backgroundColor = "seagreen";
+		// document.getElementById("PlayerButton0").style.color = "#EFE8D8";
+		// document.getElementById("PlayerButton0").style.cursor = "pointer";
+		// document.getElementById("PlayerButton0").style.border = "none";
+		// document.getElementById("PlayerButton0").style.fontSize = "16px"
 
-		document.getElementById("PlayerButton1").style.padding = "16px 32px";
-		document.getElementById("PlayerButton1").style.margin = "5px";
-		document.getElementById("PlayerButton1").style.backgroundColor = "seagreen";
-		document.getElementById("PlayerButton1").style.color = "#EFE8D8";
-		document.getElementById("PlayerButton1").style.cursor = "pointer";
-		document.getElementById("PlayerButton1").style.border = "none";
-		document.getElementById("PlayerButton1").style.fontSize = "16px";
+		// document.getElementById("PlayerButton1").style.padding = "16px 32px";
+		// document.getElementById("PlayerButton1").style.margin = "5px";
+		// document.getElementById("PlayerButton1").style.backgroundColor = "seagreen";
+		// document.getElementById("PlayerButton1").style.color = "#EFE8D8";
+		// document.getElementById("PlayerButton1").style.cursor = "pointer";
+		// document.getElementById("PlayerButton1").style.border = "none";
+		// document.getElementById("PlayerButton1").style.fontSize = "16px";
+
+		// document.querySelectorAll('PlayerButton').forEach(e => e.style.backgroundColor = "seagreen");
+
+		// const boxes = document.querySelectorAll('.playerbutton');
+		// boxes.forEach(box => {
+		// 	box.style.backgroundColor = "seagreen";
+		// 	box.style.padding = "16px 32px";
+		// 	console.log(box);
+		// });
 
 		document.querySelectorAll('p').forEach(e => e.style.fontFamily = "Arial");
 		document.querySelectorAll('label').forEach(e => e.style.fontFamily = "Arial");
@@ -145,6 +172,7 @@ class TestGameClient {
 	constructor(rootElement, { playerID } = {}, { matchID } = {}) {
 		this.client = Client({
 			game: KiwiKluedo,
+			numPlayers: players,
 			multiplayer: SocketIO({ server: 'localhost:8080' }),
 			matchID: matchID,
 			playerID,
@@ -171,6 +199,7 @@ class TestGameClient {
 	}
 
 	createBoard(state) {
+
 		console.log("Creating board");
 		// Create a nxn board of cells
 		const rows = [];
