@@ -52,11 +52,11 @@ function SplashScreen(rootElement) {
 
 			// click event which reads the splash screen information
 			button.onclick = () => {
-				if(playerID == 0){
+				if (playerID == 0) {
 					var select = document.getElementById('players');
 					players = parseInt(select.options[select.selectedIndex].value);
 				}
-				
+
 				// sets game length dependent variables
 				if (document.getElementById('short').checked) {
 					numChars = getRndInteger(3, 5);
@@ -78,7 +78,7 @@ function SplashScreen(rootElement) {
 				}
 				// gets players name
 				playerName = document.getElementById('PlayerName').value;
-				if(playerName == ""){
+				if (playerName == "") {
 					playerName = "Player 1";
 				}
 				// sets return items
@@ -205,7 +205,7 @@ class TestGameClient {
 		// Add the HTML to our app <div>.
 		// this.rootElement.innerHTML = `<table>${rows.join('')}</table><p class="winner"></p>`;
 		//this.rootElement.innerHTML = `<h2 style="font-family: Arial;font-size: 30px">MatchID: ${this.client.matchID} --> Player ${this.client.playerID} </h2>`;
-		this.rootElement.innerHTML = `<h2 id='idNames'>MatchID: ${this.client.matchID} --> Player ${parseInt(this.client.playerID)+1} </h2>`;
+		this.rootElement.innerHTML = `<h2 id='idNames'>MatchID: ${this.client.matchID} --> Player ${parseInt(this.client.playerID) + 1} </h2>`;
 		document.getElementById("idNames").style.fontFamily = "Arial";
 		document.getElementById("idNames").style.fontSize = "30px";
 
@@ -359,7 +359,6 @@ class TestGameClient {
 			//for loop 
 			var checkedvalues = [];
 			for (let hh = 0; hh < state.G._cardsInPlay.length; hh++) {
-
 				for (let ii = 0; ii < state.G._cardsInPlay[hh].length; ii++) { // For each card in the game,
 					const radio = document.getElementById(`${hh},${ii}`);
 					if (radio.checked) {
@@ -368,19 +367,7 @@ class TestGameClient {
 					}
 				}
 			}
-			// console.log(state.G.playerLocations);
-			// console.log(state.G.currentPlayer);
-			// let curRoom = state.G.playerLocations[state.G.currentPlayer][3]; // Get the current room index
-			// console.log(curRoom);
-			// let curRoomName = state.G._cardsInPlay[1][curRoom]; // Get the current room name
-			// if (checkedvalues[1] == curRoomName){
 			this.client.moves.askPlayersQuestion(checkedvalues[0], checkedvalues[1], checkedvalues[2]);
-			// }
-			// else {
-			// 	console.log("not in right room");
-			// }
-
-			//player such ans an item which os this 
 		}
 		const handleallOrNothingClick = event => { //handles the click event for the all or nothing button
 			console.log("All or Nothing question asked");
@@ -515,6 +502,7 @@ class TestGameClient {
 					cardElement.innerHTML += `<p class="playerCards">${playerCards[jj]}</p>`;
 				}
 				updateCounter--;
+				this.attachListeners(state); // Dude this solution is so dumb
 
 				document.querySelectorAll('p').forEach(e => e.style.fontFamily = "Arial");
 				document.querySelectorAll('p').forEach(e => e.style.fontSize = "18px");
