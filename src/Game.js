@@ -143,12 +143,16 @@ export const KiwiKluedo = {
 					while (curIndex != ctx.currentPlayer) {
 						let output = QuerryPlayerInv(G, curIndex, character, room, item);
 						if (output[0] != 0) { // If the player has one of the querried items
+							console.log(`Player ${curIndex+1} has the card ${output[1]}`);
+							console.log(output);
+							window.alert(`Player ${curIndex+1} has the card ${output[1]}`);
 							G.querryOutput = [curIndex, output[0], output[1]]; // Save the output of the querry
 							return;
 						}
 						curIndex = (curIndex + 1) % ctx.numPlayers; // Loop around
 					}
 					console.log("Items not found"); // No players had these items. Player should make an accusation, assuming they didn't querry one of their own items
+					window.alert("No card found");
 					G.querryOutput = [null, 0, null];
 					return;
 				}
@@ -164,10 +168,10 @@ export const KiwiKluedo = {
 				// Player does NOT need to be in the room. If the accusation is correct, set winner. Otherwise set loser.
 				if (character == G._answer[0] && room == G._answer[1] && item == G._answer[2]) {
 					G.winner = ctx.currentPlayer; // "endIf" will trigger next, and run the end game function
-					console.log('Player wins!');
+					console.log('Player wins! <----------------');
 				} else {
 					G.losers[ctx.currentPlayer] = true; // Big sad, player is now out of the game. Other players only know that the guess is wrong, not which parts.
-					console.log('Player Loses!');
+					console.log('Player Loses! <----------------');
 				}
 			}
 		}
@@ -327,17 +331,17 @@ function QuerryPlayerInv(G, player, character, room, item) { // Returns 1,2 or 3
 	let playerInvCharacter = playerInv[0]; // Get this players characters
 	if (playerInvCharacter.includes(character)) { // Is it correct?
 		console.log('player: ' + player + ', playerInvCharacter: ' + character);
-		return [1, playerInvCharacter]; // Return
+		return [1, character]; // Return
 	}
 	let playerInvRoom = playerInv[1]; // Otherwise check rooms etc
 	if (playerInvRoom.includes(room)) {
 		console.log('player: ' + player + ', playerInvRoom: ' + room);
-		return [2, playerInvRoom];
+		return [2, room];
 	}
 	let playerInvItem = playerInv[2];
 	if (playerInvItem.includes(item)) {
 		console.log('player: ' + player + ', playerInvItem: ' + item);
-		return [3, playerInvItem];
+		return [3, item];
 	}
 	console.log('player: ' + player + ' had nothing');
 	return [0, null]; // Item not found on player

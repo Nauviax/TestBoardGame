@@ -372,12 +372,12 @@ class TestGameClient {
 
 			let querryOutput = state.G.querryOutput;
 			if (querryOutput[1] == 0 || querryOutput[0] == null){
-				console.log("no card found");
-				window.alert("no card found");
+				//console.log("no card found  <----------------");
+				//window.alert("no card found");
 			}
 			else{
-				console.log("player "  + querryOutput[0] + " has the card " + querryOutput[2]);
-				window.alert("player "  + querryOutput[0] + " has the card " + querryOutput[2]);
+				//console.log("player "  + querryOutput[0] + " has the card " + querryOutput[2] + " <----------------");
+				//window.alert("player "  + querryOutput[0] + " has the card " + querryOutput[2]);
 			}
 			
 		}
